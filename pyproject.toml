@@ -1,5 +1,5 @@
 [project]
-name = "skillify"
+name = "aptwise"
 version = "0.1.0"
 description = ""
 authors = [
@@ -10,16 +10,16 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "pandas (>=2.2.3,<3.0.0)",
-    "transformers (>=4.52.4,<5.0.0)"
+    "transformers (>=4.52.4,<5.0.0)",
 ]
 
 [tool.poetry]
-packages = [{include = "skillify", from = "src"}]
+packages = [{include = "aptwise", from = "src"}]
 
 
 [tool.poetry.group.dev.dependencies]
-flake8 = "^7.2.0"
 pylint = "^3.3.7"
+flake8 = "^7.2.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
