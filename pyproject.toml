@@ -1,0 +1,26 @@
+[project]
+name = "skillify"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Arya-Chakraborty",email = "aryastlawrence@gmail.com"},
+    {name = "auhonab", email = "auhonabasu03@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas (>=2.2.3,<3.0.0)",
+    "transformers (>=4.52.4,<5.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "skillify", from = "src"}]
+
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^7.2.0"
+pylint = "^3.3.7"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

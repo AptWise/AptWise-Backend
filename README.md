@@ -1,2 +1,2 @@
-# AptWise-Backend
-This will contain the backend of AptWise
+# Skillify
+Your personalized AI powered interviewer
