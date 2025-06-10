@@ -1,0 +1,62 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [dev]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  lint-and-pr:
+    if: "!startsWith(github.event.head_commit.message, 'ci:')"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Run Flake8
+        run: poetry run flake8 src/
+
+      - name: Run Pylint with Score Check
+        id: pylint
+        run: |
+          SCORE=$(poetry run pylint src/ | tee pylint.log | tail -n 2 | grep -oP '(?<=Your code has been rated at )[0-9.]+')
+          echo "Pylint score: $SCORE"
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          if (( $(echo "$SCORE < 9.0" | bc -l) )); then
+            echo "Pylint score is below 9.0. Failing the build."
+            exit 1
+          fi
+
+      - name: Create Pull Request if none exists
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Use jq to count the number of open PRs from dev to main.
+          PR_COUNT=$(gh pr list --base main --head dev --json number | jq 'length')
+
+          if [ "$PR_COUNT" -eq 0 ]; then
+            echo "No existing PR found. Creating a new one."
+            gh pr create \
+              --base main \
+              --head dev \
+              --title "Auto PR: Merge dev into main" \
+              --body "This PR was automatically created by the CI pipeline after successful lint checks on the dev branch."
+          else
+            echo "An open pull request from dev to main already exists. No new PR will be created."
+          fi
