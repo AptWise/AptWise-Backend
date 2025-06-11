@@ -13,9 +13,11 @@ app = FastAPI()
 users = []
 
 # Email validation regex pattern
-EMAIL_PATTERN = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+EMAIL_PATTERN = \
+    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
 # URL validation regex pattern
-URL_PATTERN = r'^https?://(?:www\.)?[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+(?:[/?].*)?$'
+URL_PATTERN = \
+    r'^https?://(?:www\.)?[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+(?:[/?].*)?$'
 
 
 def validate_email(email: str) -> bool:
@@ -44,23 +46,30 @@ async def create_account(request: Request):
     try:
         user_data = await request.json()
     except Exception:
-        raise HTTPException(status_code=400, detail="Invalid JSON format")
+        raise HTTPException(status_code=400,
+                            detail="Invalid JSON format")
     # Validate required fields
     required_fields = ["name", "email", "password"]
     for field in required_fields:
         if field not in user_data or not user_data[field]:
-            raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
+            raise HTTPException(status_code=400,
+                                detail=f"Missing required field: {field}")
     # Validate email format
     if not validate_email(user_data["email"]):
-        raise HTTPException(status_code=400, detail="Invalid email format")
+        raise HTTPException(status_code=400,
+                            detail="Invalid email format")
     # Validate URL formats if provided
     for url_field in ["linkedin_url", "github_url"]:
-        if url_field in user_data and user_data[url_field] and not validate_url(user_data[url_field]):
-            raise HTTPException(status_code=400, detail=f"Invalid {url_field} format")
+        if url_field in user_data and \
+                user_data[url_field] and \
+                not validate_url(user_data[url_field]):
+            raise HTTPException(status_code=400,
+                                detail=f"Invalid {url_field} format")
     # Check if email already exists
     for user in users:
         if user["email"] == user_data["email"]:
-            raise HTTPException(status_code=400, detail="Email already registered")
+            raise HTTPException(status_code=400,
+                                detail="Email already registered")
     # Hash the password
     hashed_password = hash_password(user_data["password"])
     # Create new user record
@@ -88,18 +97,21 @@ async def login(request: Request):
     try:
         user_data = await request.json()
     except Exception:
-        raise HTTPException(status_code=400, detail="Invalid JSON format")
+        raise HTTPException(status_code=400,
+                            detail="Invalid JSON format")
     # Validate required fields
     required_fields = ["email", "password"]
     for field in required_fields:
         if field not in user_data or not user_data[field]:
-            raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
+            raise HTTPException(status_code=400,
+                                detail=f"Missing required field: {field}")
     # Validate email format
     if not validate_email(user_data["email"]):
         raise HTTPException(status_code=400, detail="Invalid email format")
     hashed_password = hash_password(user_data["password"])
     for user in users:
-        if user["email"] == user_data["email"] and user["password"] == hashed_password:
+        if user["email"] == user_data["email"] and \
+                user["password"] == hashed_password:
             return {"status": "success", "message": "Login successful"}
     raise HTTPException(status_code=401, detail="Invalid email or password")
 
