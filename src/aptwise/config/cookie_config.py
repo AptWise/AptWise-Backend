@@ -15,6 +15,3 @@ COOKIE_NAME = "access_token"
 EMAIL_PATTERN = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
 URL_PATTERN = r'^https?://(?:www\.)?[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)' + \
               r'+(?:[/?].*)?$'
-
-# In-memory storage (replace with database in production)
-users = []

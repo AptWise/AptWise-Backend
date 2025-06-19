@@ -1,11 +1,11 @@
 """
 Authentication utilities for JWT and password handling.
 """
-from fastapi import Response, Cookie
+import hashlib
 from typing import Optional
 from datetime import datetime, timedelta, timezone
+from fastapi import Response, Cookie
 from jose import JWTError, jwt
-import hashlib
 from ..config import (SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES,
                       COOKIE_NAME)
 
