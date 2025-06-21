@@ -3,7 +3,7 @@ Database configuration for PostgreSQL DB.
 """
 import os
 import traceback
-from sqlalchemy import create_engine, MetaData, Table, Column, String, text
+from sqlalchemy import create_engine, MetaData, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -42,26 +42,7 @@ except Exception as e:
     engine = None
     SessionLocal = None
 
-# Create tables
-if engine:
-    try:
-        # Define the users table
-        users = Table(
-            'users',
-            metadata,
-            Column('email', String, primary_key=True),
-            Column('name', String),
-            Column('password', String),
-            Column('linkedin_url', String, nullable=True),
-            Column('github_url', String, nullable=True),
-        )
-
-        # Create tables
-        print("Creating tables if they don't exist...")
-        metadata.create_all(engine)
-        print("Successfully created/verified tables")
-    except Exception as e:
-        print(f"Error setting up tables: {e}")
+# Note: Tables are now managed by Alembic migrations
 
 
 def get_session():
@@ -75,7 +56,4 @@ def get_session():
     return None
 
 
-def create_tables():
-    """Create any necessary tables if they don't exist."""
-    if engine:
-        metadata.create_all(engine)
+# Tables are now managed by Alembic migrations

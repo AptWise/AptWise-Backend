@@ -10,7 +10,7 @@ from .cookie_config import (
     URL_PATTERN
 )
 
-from .db_config import get_session, create_tables, engine, metadata
+from .db_config import get_session, engine
 
 __all__ = [
     "SECRET_KEY",
@@ -20,7 +20,5 @@ __all__ = [
     "EMAIL_PATTERN",
     "URL_PATTERN",
     "get_session",
-    "create_tables",
-    "engine",
-    "metadata"
+    "engine"
 ]
