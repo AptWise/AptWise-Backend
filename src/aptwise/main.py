@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException, Depends, status
 import uvicorn
 from .auth.routes import router as auth_router
 from .auth.utils import get_current_user
-from .config import create_tables, get_session
+from .config import get_session
 
 app = FastAPI(
     title="AptWise Backend API",
@@ -25,8 +25,7 @@ if not session:
     time.sleep(1)
     sys.exit(1)
 
-# Initialize database tables
-create_tables()
+# Note: Tables are now managed by Alembic migrations
 
 # Include authentication routes
 app.include_router(auth_router)
