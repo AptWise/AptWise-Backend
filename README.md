@@ -8,7 +8,7 @@ This project is a FastAPI backend for the AptWise application with authenticatio
 - JWT-based authentication with cookie storage
 - User registration, login, and account management
 - PostgreSQL integration for persistent data storage
-- Database migrations with Alembic
+- Database migrations with SQLAlchemy-Alembic
 
 ## Prerequisites
 
