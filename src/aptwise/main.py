@@ -2,8 +2,21 @@
 Main FastAPI application for AptWise backend.
 """
 import sys
+import os
 from typing import Optional
-from fastapi import FastAPI, HTTPException, Depends, status
+from dotenv import load_dotenv
+
+# Load environment variables first, before any other imports
+load_dotenv()
+
+# Debug: Print environment loading status
+print("🔍 Environment Variables Status:")
+print(f"LINKEDIN_CLIENT_ID: {os.getenv('LINKEDIN_CLIENT_ID')}")
+print(f"LINKEDIN_CLIENT_SECRET: {'Present' if os.getenv('LINKEDIN_CLIENT_SECRET') else 'Missing'}")
+print(f"LINKEDIN_REDIRECT_URI: {os.getenv('LINKEDIN_REDIRECT_URI')}")
+
+from fastapi import FastAPI, HTTPException, Depends, status, Request
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from .auth.routes import router as auth_router
 from .auth.utils import get_current_user
@@ -11,8 +24,33 @@ from .config import get_session
 
 app = FastAPI(
     title="AptWise Backend API",
-    description="Backend API for AptWise application with authentication",
+    description="Backend API for AptWise application with authentication and LinkedIn OAuth",
     version="1.0.0"
+)
+
+# Add middleware to log all requests (for debugging)
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    print(f"🌐 {request.method} {request.url}")
+    response = await call_next(request)
+    print(f"📤 Response: {response.status_code}")
+    return response
+
+# Add CORS middleware for frontend integration
+app.add_middleware(
+    CORSMiddleware,
+        allow_origins=[
+        "http://localhost:3000", 
+        "http://localhost:5173", 
+        "http://localhost:5174",
+        "http://localhost:8080", 
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174"
+    ],   # Add your frontend URLs
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Check database connection

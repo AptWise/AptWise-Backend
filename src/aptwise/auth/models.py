@@ -46,3 +46,43 @@ class UserResponse(BaseModel):
     email: str
     linkedin_url: Optional[str] = None
     github_url: Optional[str] = None
+    linkedin_id: Optional[str] = None
+    github_id: Optional[str] = None
+    profile_picture_url: Optional[str] = None
+    is_linkedin_connected: bool = False
+    is_github_connected: bool = False
+
+
+class LinkedInUserProfile(BaseModel):
+    linkedin_id: str
+    email: str
+    first_name: str
+    last_name: str
+    full_name: str
+    profile_picture_url: Optional[str] = None
+
+
+class LinkedInAuthRequest(BaseModel):
+    code: str
+    state: str
+
+
+class GitHubUserProfile(BaseModel):
+    github_id: str
+    username: str
+    email: str
+    name: str
+    avatar_url: Optional[str] = None
+    bio: Optional[str] = None
+    company: Optional[str] = None
+    blog: Optional[str] = None
+    location: Optional[str] = None
+    public_repos: int = 0
+    followers: int = 0
+    following: int = 0
+    github_url: Optional[str] = None
+
+
+class GitHubAuthRequest(BaseModel):
+    code: str
+    state: str
