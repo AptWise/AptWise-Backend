@@ -3,30 +3,34 @@ Main FastAPI application for AptWise backend.
 """
 import sys
 import os
+import time
 from typing import Optional
 from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException, Depends, status, Request
+from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
 
 # Load environment variables first, before any other imports
 load_dotenv()
 
 # Debug: Print environment loading status
-print("🔍 Environment Variables Status:")
+print("Environment Variables Status:")
 print(f"LINKEDIN_CLIENT_ID: {os.getenv('LINKEDIN_CLIENT_ID')}")
-print(f"LINKEDIN_CLIENT_SECRET: {'Present' if os.getenv('LINKEDIN_CLIENT_SECRET') else 'Missing'}")
+linkedin_secret = os.getenv('LINKEDIN_CLIENT_SECRET')
+print(f"LINKEDIN_CLIENT_SECRET: {'Present' if linkedin_secret else 'Missing'}")
 print(f"LINKEDIN_REDIRECT_URI: {os.getenv('LINKEDIN_REDIRECT_URI')}")
 
-from fastapi import FastAPI, HTTPException, Depends, status, Request
-from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
-from .auth.routes import router as auth_router
-from .auth.utils import get_current_user
-from .config import get_session
+from .auth.routes import router as auth_router  # noqa: E402
+from .auth.utils import get_current_user  # noqa: E402
+from .config import get_session  # noqa: E402
 
 app = FastAPI(
     title="AptWise Backend API",
-    description="Backend API for AptWise application with authentication and LinkedIn OAuth",
+    description="Backend API for AptWise application with authentication "
+                "and LinkedIn OAuth",
     version="1.0.0"
 )
+
 
 # Add middleware to log all requests (for debugging)
 @app.middleware("http")
@@ -36,14 +40,15 @@ async def log_requests(request: Request, call_next):
     print(f"📤 Response: {response.status_code}")
     return response
 
+
 # Add CORS middleware for frontend integration
 app.add_middleware(
     CORSMiddleware,
-        allow_origins=[
-        "http://localhost:3000", 
-        "http://localhost:5173", 
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
         "http://localhost:5174",
-        "http://localhost:8080", 
+        "http://localhost:8080",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:5173",
         "http://127.0.0.1:5174"
@@ -56,10 +61,9 @@ app.add_middleware(
 # Check database connection
 session = get_session()
 if not session:
-    print("ERROR: Failed to connect to PostgreSQL database. \
-          Application will exit.")
+    print("ERROR: Failed to connect to PostgreSQL database. "
+          "Application will exit.")
     # Add a small delay before exiting to allow error messages to be printed
-    import time
     time.sleep(1)
     sys.exit(1)
 
