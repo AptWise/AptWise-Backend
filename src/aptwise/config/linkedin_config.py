@@ -11,14 +11,17 @@ load_dotenv()
 print("Loading LinkedIn OAuth config...")
 print(f"CLIENT_ID: {os.getenv('LINKEDIN_CLIENT_ID')}")
 client_secret = os.getenv('LINKEDIN_CLIENT_SECRET')
-print(f"CLIENT_SECRET: {'*' * len(client_secret) if client_secret else 'None'}")
+print(f"CLIENT_SECRET: "
+      f"{'*' * len(client_secret) if client_secret else 'None'}")
 print(f"REDIRECT_URI: {os.getenv('LINKEDIN_REDIRECT_URI')}")
 
 # LinkedIn OAuth settings
 LINKEDIN_CLIENT_ID = os.getenv("LINKEDIN_CLIENT_ID")
 LINKEDIN_CLIENT_SECRET = os.getenv("LINKEDIN_CLIENT_SECRET")
-LINKEDIN_REDIRECT_URI = os.getenv("LINKEDIN_REDIRECT_URI",
-                                  "http://localhost:8000/auth/linkedin/callback")
+LINKEDIN_REDIRECT_URI = os.getenv(
+    "LINKEDIN_REDIRECT_URI",
+    "http://localhost:8000/auth/linkedin/callback"
+)
 
 # LinkedIn OAuth endpoints
 LINKEDIN_AUTHORIZATION_URL = "https://www.linkedin.com/oauth/v2/authorization"

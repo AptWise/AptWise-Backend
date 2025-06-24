@@ -146,24 +146,27 @@ def create_user_with_linkedin(user_data: Dict[str, Any]) -> bool:
         raise RuntimeError("Database connection not available")
 
     query = text("""
-    INSERT INTO users (email, name, password, linkedin_url, github_url, 
-                      linkedin_id, linkedin_access_token, profile_picture_url, is_linkedin_connected)
-    VALUES (:email, :name, :password, :linkedin_url, :github_url, 
-            :linkedin_id, :linkedin_access_token, :profile_picture_url, :is_linkedin_connected)
+    INSERT INTO users (email, name, password, linkedin_url,\
+        github_url, linkedin_id, linkedin_access_token, \
+        profile_picture_url, is_linkedin_connected)
+    VALUES (:email, :name, :password, :linkedin_url, \
+        :github_url, :linkedin_id, :linkedin_access_token,\
+        :profile_picture_url, :is_linkedin_connected)
     """)
 
     try:
         session.execute(
-            query,
-            {
+            query,            {
                 "email": user_data["email"],
                 "name": user_data["name"],
-                "password": user_data.get("password", ""),  # Empty password for LinkedIn users
+                "password": user_data.get("password", ""),
                 "linkedin_url": user_data.get("linkedin_url", None),
                 "github_url": user_data.get("github_url", None),
                 "linkedin_id": user_data["linkedin_id"],
                 "linkedin_access_token": user_data["linkedin_access_token"],
-                "profile_picture_url": user_data.get("profile_picture_url", None),
+                "profile_picture_url": user_data.get(
+                    "profile_picture_url", None
+                ),
                 "is_linkedin_connected": True
             }
         )
@@ -177,15 +180,17 @@ def create_user_with_linkedin(user_data: Dict[str, Any]) -> bool:
         return False
 
 
-def update_user_linkedin_connection(email: str, linkedin_data: Dict[str, Any]) -> bool:
+def update_user_linkedin_connection(
+    email: str, linkedin_data: Dict[str, Any]
+) -> bool:
     """Update existing user with LinkedIn OAuth data."""
     session = get_session()
     if not session:
         raise RuntimeError("Database connection not available")
 
     query = text("""
-    UPDATE users 
-    SET linkedin_id = :linkedin_id, 
+    UPDATE users
+    SET linkedin_id = :linkedin_id,
         linkedin_access_token = :linkedin_access_token,
         profile_picture_url = :profile_picture_url,
         is_linkedin_connected = :is_linkedin_connected
@@ -198,8 +203,11 @@ def update_user_linkedin_connection(email: str, linkedin_data: Dict[str, Any]) -
             {
                 "email": email,
                 "linkedin_id": linkedin_data["linkedin_id"],
-                "linkedin_access_token": linkedin_data["linkedin_access_token"],
-                "profile_picture_url": linkedin_data.get("profile_picture_url", None),
+                "linkedin_access_token":
+                    linkedin_data["linkedin_access_token"],
+                "profile_picture_url": linkedin_data.get(
+                    "profile_picture_url", None
+                ),
                 "is_linkedin_connected": True
             }
         )
@@ -220,8 +228,8 @@ def disconnect_user_linkedin(email: str) -> bool:
         raise RuntimeError("Database connection not available")
 
     query = text("""
-    UPDATE users 
-    SET linkedin_id = NULL, 
+    UPDATE users
+    SET linkedin_id = NULL,
         linkedin_access_token = NULL,
         is_linkedin_connected = FALSE
     WHERE email = :email
@@ -276,10 +284,12 @@ def create_user_with_github(user_data: Dict[str, Any]) -> bool:
         raise RuntimeError("Database connection not available")
 
     query = text("""
-    INSERT INTO users (email, name, password, linkedin_url, github_url, 
-                      github_id, github_access_token, profile_picture_url, is_github_connected)
-    VALUES (:email, :name, :password, :linkedin_url, :github_url, 
-            :github_id, :github_access_token, :profile_picture_url, :is_github_connected)
+    INSERT INTO users (email, name, password, linkedin_url, github_url,
+                      github_id, github_access_token, profile_picture_url,
+                      is_github_connected)
+    VALUES (:email, :name, :password, :linkedin_url, :github_url,
+            :github_id, :github_access_token, :profile_picture_url,
+            :is_github_connected)
     """)
 
     try:
@@ -288,12 +298,16 @@ def create_user_with_github(user_data: Dict[str, Any]) -> bool:
             {
                 "email": user_data["email"],
                 "name": user_data["name"],
-                "password": user_data.get("password", ""),  # Empty password for GitHub users
+                "password": user_data.get(
+                    "password", ""
+                ),  # Empty password for GitHub users
                 "linkedin_url": user_data.get("linkedin_url", None),
                 "github_url": user_data.get("github_url", None),
                 "github_id": user_data["github_id"],
                 "github_access_token": user_data["github_access_token"],
-                "profile_picture_url": user_data.get("profile_picture_url", None),
+                "profile_picture_url": user_data.get(
+                    "profile_picture_url", None
+                ),
                 "is_github_connected": True
             }
         )
@@ -307,18 +321,20 @@ def create_user_with_github(user_data: Dict[str, Any]) -> bool:
         return False
 
 
-def update_user_github_connection(email: str, github_data: Dict[str, Any]) -> bool:
+def update_user_github_connection(email: str,
+                                  github_data: Dict[str, Any]) -> bool:
     """Update existing user with GitHub OAuth data."""
     session = get_session()
     if not session:
         raise RuntimeError("Database connection not available")
 
     query = text("""
-    UPDATE users 
-    SET github_id = :github_id, 
+    UPDATE users
+    SET github_id = :github_id,
         github_access_token = :github_access_token,
         github_url = :github_url,
-        profile_picture_url = COALESCE(:profile_picture_url, profile_picture_url),
+        profile_picture_url = \
+        COALESCE(:profile_picture_url, profile_picture_url),
         is_github_connected = :is_github_connected
     WHERE email = :email
     """)
@@ -331,7 +347,8 @@ def update_user_github_connection(email: str, github_data: Dict[str, Any]) -> bo
                 "github_id": github_data["github_id"],
                 "github_access_token": github_data["github_access_token"],
                 "github_url": github_data.get("github_url", None),
-                "profile_picture_url": github_data.get("profile_picture_url", None),
+                "profile_picture_url":
+                    github_data.get("profile_picture_url", None),
                 "is_github_connected": True
             }
         )
@@ -352,8 +369,8 @@ def disconnect_user_github(email: str) -> bool:
         raise RuntimeError("Database connection not available")
 
     query = text("""
-    UPDATE users 
-    SET github_id = NULL, 
+    UPDATE users
+    SET github_id = NULL,
         github_access_token = NULL,
         is_github_connected = FALSE
     WHERE email = :email

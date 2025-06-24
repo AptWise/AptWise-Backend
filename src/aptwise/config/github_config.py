@@ -11,7 +11,8 @@ load_dotenv()
 print("Loading GitHub OAuth config...")
 print(f"CLIENT_ID: {os.getenv('GITHUB_CLIENT_ID')}")
 client_secret = os.getenv('GITHUB_CLIENT_SECRET')
-print(f"CLIENT_SECRET: {'*' * len(client_secret) if client_secret else 'None'}")
+print(f"CLIENT_SECRET: "
+      f"{'*' * len(client_secret) if client_secret else 'None'}")
 print(f"REDIRECT_URI: {os.getenv('GITHUB_REDIRECT_URI')}")
 
 # GitHub OAuth settings
