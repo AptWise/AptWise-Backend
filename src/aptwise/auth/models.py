@@ -10,9 +10,18 @@ from ..config import EMAIL_PATTERN, URL_PATTERN
 class UserCreate(BaseModel):
     name: str
     email: str
-    password: str
+    password: Optional[str] = None  # Optional for OAuth-only users
     linkedin_url: Optional[str] = None
     github_url: Optional[str] = None
+    # OAuth data (optional, for users registering via OAuth)
+    linkedin_id: Optional[str] = None
+    linkedin_access_token: Optional[str] = None
+    github_id: Optional[str] = None
+    github_access_token: Optional[str] = None
+    profile_picture_url: Optional[str] = None
+    is_linkedin_connected: Optional[bool] = False
+    is_github_connected: Optional[bool] = False
+    is_oauth_only: Optional[bool] = False  # Indicates OAuth-only registration
 
     @field_validator('email')
     @classmethod
@@ -24,6 +33,9 @@ class UserCreate(BaseModel):
     @field_validator('linkedin_url', 'github_url')
     @classmethod
     def validate_url_format(cls, v):
+        # Convert empty strings to None
+        if v == '':
+            v = None
         if v is not None and not re.match(URL_PATTERN, v):
             raise ValueError('Invalid URL format')
         return v

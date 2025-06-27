@@ -37,14 +37,22 @@ def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
 
 
 def create_user(user_data: Dict[str, Any]) -> bool:
-    """Create a new user in the database."""
+    """Create a new user in the database with optional OAuth data."""
     session = get_session()
     if not session:
         raise RuntimeError("Database connection not available")
 
     query = text("""
-    INSERT INTO users (email, name, password, linkedin_url, github_url)
-    VALUES (:email, :name, :password, :linkedin_url, :github_url)
+    INSERT INTO users (
+        email, name, password, linkedin_url, github_url,
+        linkedin_id, linkedin_access_token, github_id, github_access_token,
+        profile_picture_url, is_linkedin_connected, is_github_connected
+    )
+    VALUES (
+        :email, :name, :password, :linkedin_url, :github_url,
+        :linkedin_id, :linkedin_access_token, :github_id, :github_access_token,
+        :profile_picture_url, :is_linkedin_connected, :is_github_connected
+    )
     """)
 
     try:
@@ -55,7 +63,20 @@ def create_user(user_data: Dict[str, Any]) -> bool:
                 "name": user_data["name"],
                 "password": user_data["password"],
                 "linkedin_url": user_data.get("linkedin_url", None),
-                "github_url": user_data.get("github_url", None)
+                "github_url": user_data.get("github_url", None),
+                # OAuth fields
+                "linkedin_id": user_data.get("linkedin_id", None),
+                "linkedin_access_token":
+                user_data.get("linkedin_access_token", None),
+                "github_id": user_data.get("github_id", None),
+                "github_access_token":
+                user_data.get("github_access_token", None),
+                "profile_picture_url":
+                user_data.get("profile_picture_url", None),
+                "is_linkedin_connected":
+                user_data.get("is_linkedin_connected", False),
+                "is_github_connected":
+                user_data.get("is_github_connected", False)
             }
         )
         session.commit()
