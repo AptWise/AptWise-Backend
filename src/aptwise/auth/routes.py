@@ -23,23 +23,46 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 
 @router.post("/create-account", response_model=UserResponse)
 async def create_account(user_data: UserCreate, response: Response):
-    """Create a new user account."""
+    """Create a new user account with optional OAuth data."""
     # Check if email already exists
     existing_user = get_user_by_email(user_data.email)
     if existing_user:
         raise HTTPException(status_code=400,
                             detail="Email already registered")
 
-    # Hash the password
-    hashed_password = hash_password(user_data.password)
+    # Handle password for OAuth-only users
+    password_to_hash = user_data.password
+    if user_data.is_oauth_only and not password_to_hash:
+        # Generate a secure random password for OAuth-only users
+        # They won't need this password as they'll login via OAuth
+        import secrets
+        import string
+        alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+        password_to_hash = ''.join(secrets.choice(alphabet) for i in range(32))
+    elif not password_to_hash:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password is required for non-OAuth registration"
+        )
 
-    # Create new user record
+    # Hash the password
+    hashed_password = hash_password(password_to_hash)
+
+    # Create new user record with OAuth data if provided
     new_user = {
         "name": user_data.name,
         "email": user_data.email,
         "password": hashed_password,
         "linkedin_url": user_data.linkedin_url,
-        "github_url": user_data.github_url
+        "github_url": user_data.github_url,
+        # OAuth fields
+        "linkedin_id": user_data.linkedin_id,
+        "linkedin_access_token": user_data.linkedin_access_token,
+        "github_id": user_data.github_id,
+        "github_access_token": user_data.github_access_token,
+        "profile_picture_url": user_data.profile_picture_url,
+        "is_linkedin_connected": bool(user_data.linkedin_id),
+        "is_github_connected": bool(user_data.github_id)
     }
 
     # Add user to database
@@ -55,15 +78,17 @@ async def create_account(user_data: UserCreate, response: Response):
     access_token = create_access_token(data={"sub": user_data.email})
     set_access_cookies(response, access_token)
 
-    # Return user data (without password)
+    # Return user data (without password and access tokens)
     return {
         "name": new_user["name"],
         "email": new_user["email"],
         "linkedin_url": new_user["linkedin_url"],
         "github_url": new_user["github_url"],
-        "linkedin_id": None,
-        "profile_picture_url": None,
-        "is_linkedin_connected": False
+        "linkedin_id": new_user["linkedin_id"],
+        "github_id": new_user["github_id"],
+        "profile_picture_url": new_user["profile_picture_url"],
+        "is_linkedin_connected": new_user["is_linkedin_connected"],
+        "is_github_connected": new_user["is_github_connected"]
     }
 
 
@@ -822,3 +847,123 @@ async def debug_github_config():
             else "Unknown"
         )
     }
+
+
+# Temporary OAuth endpoints for registration (don't create users immediately)
+@router.post("/linkedin/profile")
+async def get_linkedin_profile_for_registration(auth_request:
+                                                LinkedInAuthRequest):
+    """Get LinkedIn profile data for registration without creating user."""
+    try:
+        # Exchange code for access token
+        token_data = await linkedin_oauth_service.exchange_code_for_token(
+            auth_request.code
+        )
+        access_token = token_data["access_token"]
+
+        # Get user profile from LinkedIn
+        linkedin_profile = await linkedin_oauth_service.get_user_info(
+            access_token
+        )
+
+        if not linkedin_profile.get("email"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unable to retrieve email from LinkedIn profile"
+            )
+
+        # Check if LinkedIn ID is already connected to another account
+        linkedin_user = get_user_by_linkedin_id(
+            linkedin_profile["linkedin_id"]
+        )
+        if linkedin_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    "This LinkedIn account is already connected to "
+                    "another user"
+                )
+            )
+        prof = linkedin_profile.get('vanity_name', '')
+
+        # Return profile data with access token for later use
+        return {
+            "status": "success",
+            "message": "LinkedIn profile retrieved successfully",
+            "profile": {
+                "name": linkedin_profile["full_name"],
+                "email": linkedin_profile["email"],
+                "linkedin_id": linkedin_profile["linkedin_id"],
+                "linkedin_access_token": access_token,
+                "profile_picture_url": linkedin_profile.get(
+                    "profile_picture_url"
+                ),
+                "linkedin_url":
+                f"https://www.linkedin.com/in/{prof}"
+            }
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get LinkedIn profile: {str(e)}"
+        )
+
+
+@router.post("/github/profile")
+async def get_github_profile_for_registration(auth_request: GitHubAuthRequest):
+    """Get GitHub profile data for registration without creating user."""
+    try:
+        # Exchange code for access token
+        token_data = await github_oauth_service.exchange_code_for_token(
+            auth_request.code
+        )
+        access_token = token_data["access_token"]
+
+        # Get user profile from GitHub
+        github_profile = await github_oauth_service.get_user_info(
+            access_token
+        )
+
+        if not github_profile.get("email"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unable to retrieve email from GitHub profile"
+            )
+
+        # Check if GitHub ID is already connected to another account
+        github_user = get_user_by_github_id(
+            str(github_profile["github_id"])
+        )
+        if github_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    "This GitHub account is already connected to "
+                    "another user"
+                )
+            )
+
+        # Return profile data with access token for later use
+        return {
+            "status": "success",
+            "message": "GitHub profile retrieved successfully",
+            "profile": {
+                "name": github_profile["name"],
+                "email": github_profile["email"],
+                "github_id": str(github_profile["github_id"]),
+                "github_access_token": access_token,
+                "profile_picture_url": github_profile.get("avatar_url"),
+                "github_url": github_profile.get("github_url")
+            }
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get GitHub profile: {str(e)}"
+        )
