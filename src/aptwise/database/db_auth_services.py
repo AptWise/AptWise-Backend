@@ -407,3 +407,216 @@ def disconnect_user_github(email: str) -> bool:
         session.close()
         print(f"Error disconnecting GitHub: {e}")
         return False
+
+
+def create_user_skills(email: str, skills: List[str]) -> bool:
+    """Create user skills entries with default proficiency of 3."""
+    if not skills:
+        return True  # No skills to insert
+
+    session = get_session()
+    if not session:
+        raise RuntimeError("Database connection not available")
+
+    try:
+        # Insert each skill as a separate record
+        for skill in skills:
+            query = text("""
+            INSERT INTO user_skills (email, skill, proficiency)
+            VALUES (:email, :skill, :proficiency)
+            """)
+
+            session.execute(query, {
+                "email": email,
+                "skill": skill,
+                "proficiency": "3"  # Default proficiency as string
+            })
+
+        session.commit()
+        session.close()
+        return True
+    except Exception as e:
+        session.rollback()
+        session.close()
+        print(f"Error creating user skills: {e}")
+        return False
+
+
+def get_user_skills(email: str) -> List[Dict[str, str]]:
+    """Get all skills for a user."""
+    session = get_session()
+    if not session:
+        raise RuntimeError("Database connection not available")
+
+    query = text("SELECT skill, proficiency FROM user_skills \
+                 WHERE email = :email")
+    result = session.execute(query, {"email": email})
+    skills = result.fetchall()
+    session.close()
+
+    return [{
+        "skill": skill.skill,
+        "proficiency": skill.proficiency
+        } for skill in skills]
+
+
+def update_user_skill_proficiency(email: str,
+                                  skill: str,
+                                  proficiency: str) -> bool:
+    """Update proficiency for a specific user skill."""
+    session = get_session()
+    if not session:
+        raise RuntimeError("Database connection not available")
+
+    query = text("""
+    UPDATE user_skills
+    SET proficiency = :proficiency
+    WHERE email = :email AND skill = :skill
+    """)
+
+    try:
+        result = session.execute(query, {
+            "email": email,
+            "skill": skill,
+            "proficiency": proficiency
+        })
+        session.commit()
+        session.close()
+        return result.rowcount > 0
+    except Exception as e:
+        session.rollback()
+        session.close()
+        print(f"Error updating user skill proficiency: {e}")
+        return False
+
+
+def delete_user_skill(email: str, skill: str) -> bool:
+    """Delete a specific skill for a user."""
+    session = get_session()
+    if not session:
+        raise RuntimeError("Database connection not available")
+
+    query = text("DELETE FROM user_skills \
+                 WHERE email = :email AND \
+                 skill = :skill")
+
+    try:
+        result = session.execute(query, {"email": email, "skill": skill})
+        session.commit()
+        session.close()
+        return result.rowcount > 0
+    except Exception as e:
+        session.rollback()
+        session.close()
+        print(f"Error deleting user skill: {e}")
+        return False
+
+
+def delete_all_user_skills(email: str) -> bool:
+    """Delete all skills for a user (used when deleting user account)."""
+    session = get_session()
+    if not session:
+        raise RuntimeError("Database connection not available")
+
+    query = text("DELETE FROM user_skills WHERE email = :email")
+
+    try:
+        session.execute(query, {"email": email})
+        session.commit()
+        session.close()
+        return True
+    except Exception as e:
+        session.rollback()
+        session.close()
+        print(f"Error deleting all user skills: {e}")
+        return False
+
+
+def update_user_profile(email: str, name: str = None, linkedin_url: str = None,
+                        github_url: str = None, password: str = None) -> bool:
+    """Update user profile information."""
+    session = get_session()
+    if not session:
+        raise RuntimeError("Database connection not available")
+
+    # Build dynamic update query based on provided fields
+    update_fields = []
+    params = {"email": email}
+
+    if name is not None:
+        update_fields.append("name = :name")
+        params["name"] = name
+
+    if linkedin_url is not None:
+        update_fields.append("linkedin_url = :linkedin_url")
+        params["linkedin_url"] = linkedin_url
+
+    if github_url is not None:
+        update_fields.append("github_url = :github_url")
+        params["github_url"] = github_url
+
+    if password is not None:
+        update_fields.append("password = :password")
+        params["password"] = password
+
+    if not update_fields:
+        session.close()
+        return True  # Nothing to update
+
+    query = text(f"UPDATE users SET \
+                {', '.join(update_fields)} \
+                WHERE email = :email")
+
+    try:
+        session.execute(query, params)
+        session.commit()
+        session.close()
+        return True
+    except Exception as e:
+        session.rollback()
+        session.close()
+        print(f"Error updating user profile: {e}")
+        return False
+
+
+def add_user_skill(email: str, skill: str, proficiency: str = "3") -> bool:
+    """Add a new skill for a user."""
+    session = get_session()
+    if not session:
+        raise RuntimeError("Database connection not available")
+
+    # Check if skill already exists for user
+    check_query = text("SELECT COUNT(*) \
+                       FROM user_skills WHERE \
+                       email = :email AND skill = :skill")
+    result = session.execute(check_query, {"email": email, "skill": skill})
+    count = result.scalar()
+
+    if count > 0:
+        session.close()
+        return False  # Skill already exists
+
+    # Add new skill
+    query = text("INSERT INTO user_skills \
+                (email, skill, proficiency) \
+                VALUES (:email, :skill, :proficiency)")
+
+    try:
+        session.execute(query, {
+            "email": email,
+            "skill": skill,
+            "proficiency": proficiency
+        })
+        session.commit()
+        session.close()
+        return True
+    except Exception as e:
+        session.rollback()
+        session.close()
+        print(f"Error adding user skill: {e}")
+        return False
+
+
+def remove_user_skill(email: str, skill: str) -> bool:
+    """Remove a specific skill for a user."""
+    return delete_user_skill(email, skill)  # Reuse existing function

@@ -2,7 +2,7 @@
 Pydantic models for authentication.
 """
 import re
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, field_validator
 from ..config import EMAIL_PATTERN, URL_PATTERN
 
@@ -13,6 +13,7 @@ class UserCreate(BaseModel):
     password: Optional[str] = None  # Optional for OAuth-only users
     linkedin_url: Optional[str] = None
     github_url: Optional[str] = None
+    skills: Optional[List[str]] = []  # List of skills for the user
     # OAuth data (optional, for users registering via OAuth)
     linkedin_id: Optional[str] = None
     linkedin_access_token: Optional[str] = None
@@ -98,3 +99,32 @@ class GitHubUserProfile(BaseModel):
 class GitHubAuthRequest(BaseModel):
     code: str
     state: str
+
+
+class UserProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    github_url: Optional[str] = None
+
+    @field_validator('linkedin_url', 'github_url')
+    @classmethod
+    def validate_url_format(cls, v):
+        # Convert empty strings to None
+        if v == '':
+            v = None
+        if v is not None and not re.match(URL_PATTERN, v):
+            raise ValueError('Invalid URL format')
+        return v
+
+
+class PasswordUpdate(BaseModel):
+    current_password: str
+    new_password: str
+
+
+class SkillAdd(BaseModel):
+    skill: str
+
+
+class SkillRemove(BaseModel):
+    skill: str

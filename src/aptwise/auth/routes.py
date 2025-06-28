@@ -5,16 +5,21 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, Response, status
 from fastapi.responses import RedirectResponse
 from .models import (UserCreate, UserLogin, UserResponse,
-                     LinkedInAuthRequest, GitHubAuthRequest)
+                     LinkedInAuthRequest, GitHubAuthRequest,
+                     UserProfileUpdate, PasswordUpdate,
+                     SkillAdd, SkillRemove)
 from .utils import (create_access_token, set_access_cookies,
-                    unset_jwt_cookies, get_current_user, hash_password)
+                    unset_jwt_cookies, get_current_user,
+                    hash_password, verify_password)
 from ..database import (get_user_by_email, create_user, delete_user,
                         get_user_by_linkedin_id, create_user_with_linkedin,
                         update_user_linkedin_connection,
                         disconnect_user_linkedin,
                         get_user_by_github_id, create_user_with_github,
                         update_user_github_connection,
-                        disconnect_user_github)
+                        disconnect_user_github, create_user_skills,
+                        delete_all_user_skills, get_user_skills,
+                        update_user_profile, add_user_skill, remove_user_skill)
 from .linkedin_service import linkedin_oauth_service
 from .github_service import github_oauth_service
 
@@ -73,6 +78,16 @@ async def create_account(user_data: UserCreate, response: Response):
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Database service unavailable"
         )
+
+    # Create user skills if provided
+    if user_data.skills:
+        skills_success = create_user_skills(user_data.email, user_data.skills)
+        if not skills_success:
+            # If skills creation fails, we could either:
+            # 1. Continue without skills (current approach)
+            # 2. Delete the user and raise an error
+            print(f"Warning: \
+                  Failed to create skills for user {user_data.email}")
 
     # Create access token with JWT
     access_token = create_access_token(data={"sub": user_data.email})
@@ -165,7 +180,11 @@ async def delete_account(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
             headers={"WWW-Authenticate": "Bearer"}
-        )    # Delete from database
+        )
+    # Delete user skills first
+    delete_all_user_skills(current_user)
+
+    # Delete from database
     db_success = delete_user(current_user)
 
     if db_success:
@@ -966,4 +985,184 @@ async def get_github_profile_for_registration(auth_request: GitHubAuthRequest):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get GitHub profile: {str(e)}"
+        )
+
+
+@router.get("/skills")
+async def get_current_user_skills(
+    current_user: Optional[str] = Depends(get_current_user)
+):
+    """Get skills for the current user."""
+    if current_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    try:
+        skills = get_user_skills(current_user)
+        return {
+            "status": "success",
+            "skills": skills
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get user skills: {str(e)}"
+        )
+
+
+@router.put("/profile")
+async def update_profile(
+    profile_data: UserProfileUpdate,
+    current_user: Optional[str] = Depends(get_current_user)
+):
+    """Update user profile information."""
+    if current_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    try:
+        success = update_user_profile(
+            email=current_user,
+            name=profile_data.name,
+            linkedin_url=profile_data.linkedin_url,
+            github_url=profile_data.github_url
+        )
+
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to update profile"
+            )
+
+        return {"status": "success", "message": "Profile updated successfully"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update profile: {str(e)}"
+        )
+
+
+@router.put("/password")
+async def update_password(
+    password_data: PasswordUpdate,
+    current_user: Optional[str] = Depends(get_current_user)
+):
+    """Update user password."""
+    if current_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    try:
+        # Get current user data to verify current password
+        user_data = get_user_by_email(current_user)
+        if not user_data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+
+        # Verify current password
+        if not verify_password(password_data.current_password,
+                               user_data["password"]):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Current password is incorrect"
+            )
+
+        # Hash new password and update
+        new_hashed_password = hash_password(password_data.new_password)
+        success = update_user_profile(
+            email=current_user,
+            password=new_hashed_password
+        )
+
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to update password"
+            )
+
+        return {
+            "status": "success",
+            "message": "Password updated successfully"
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update password: {str(e)}"
+        )
+
+
+@router.post("/skills")
+async def add_skill(
+    skill_data: SkillAdd,
+    current_user: Optional[str] = Depends(get_current_user)
+):
+    """Add a new skill for the current user."""
+    if current_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    try:
+        success = add_user_skill(current_user, skill_data.skill)
+
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Skill already exists or failed to add"
+            )
+
+        return {"status": "success", "message": "Skill added successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to add skill: {str(e)}"
+        )
+
+
+@router.delete("/skills")
+async def remove_skill(
+    skill_data: SkillRemove,
+    current_user: Optional[str] = Depends(get_current_user)
+):
+    """Remove a skill for the current user."""
+    if current_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    try:
+        success = remove_user_skill(current_user, skill_data.skill)
+
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Skill not found or failed to remove"
+            )
+
+        return {"status": "success", "message": "Skill removed successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to remove skill: {str(e)}"
         )
