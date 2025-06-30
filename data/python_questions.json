@@ -1,0 +1,476 @@
+{
+  "questions": [
+    {
+      "question": "What is Python?",
+      "answer": "Python is a high-level, interpreted, object-oriented programming language with dynamic semantics. It was created by Guido van Rossum and first released in 1991. Python emphasizes code readability with its notable use of significant whitespace and simple, easy-to-learn syntax."
+    },
+    {
+      "question": "What are the key features of Python?",
+      "answer": "Key features include: interpreted language, dynamic typing, automatic memory management, extensive standard library, cross-platform compatibility, object-oriented programming support, functional programming features, and a large ecosystem of third-party packages."
+    },
+    {
+      "question": "What is the difference between Python 2 and Python 3?",
+      "answer": "Python 3 introduced breaking changes including: print as a function instead of statement, Unicode strings by default, integer division returns float, range() returns iterator, improved exception handling syntax, and many standard library reorganizations. Python 2 reached end-of-life in 2020."
+    },
+    {
+      "question": "What are Python data types?",
+      "answer": "Python has several built-in data types: Numbers (int, float, complex), Strings (str), Boolean (bool), Lists (list), Tuples (tuple), Sets (set), Dictionaries (dict), and None type. Python also supports custom data types through classes."
+    },
+    {
+      "question": "What is the difference between lists and tuples?",
+      "answer": "Lists are mutable (can be modified after creation), use square brackets, and are typically used for homogeneous data. Tuples are immutable (cannot be modified), use parentheses, are typically used for heterogeneous data, and can be used as dictionary keys due to their immutability."
+    },
+    {
+      "question": "What are Python dictionaries?",
+      "answer": "Dictionaries are unordered collections of key-value pairs, implemented as hash tables. They use curly braces {}, provide O(1) average time complexity for lookups, and keys must be immutable types. They're mutable and support various methods like get(), keys(), values(), and items()."
+    },
+    {
+      "question": "What is list comprehension?",
+      "answer": "List comprehension is a concise way to create lists using a single line of code. It follows the syntax [expression for item in iterable if condition]. It's more readable and often faster than traditional for loops for creating lists based on existing iterables."
+    },
+    {
+      "question": "What are Python functions?",
+      "answer": "Functions are reusable blocks of code that perform specific tasks. They're defined using the 'def' keyword, can accept parameters, return values, and support default arguments, variable-length arguments (*args, **kwargs), and can be assigned to variables or passed as arguments."
+    },
+    {
+      "question": "What is the difference between *args and **kwargs?",
+      "answer": "*args allows a function to accept any number of positional arguments as a tuple. **kwargs allows a function to accept any number of keyword arguments as a dictionary. Both provide flexibility in function parameter handling and are commonly used in Python APIs."
+    },
+    {
+      "question": "What are Python classes and objects?",
+      "answer": "Classes are blueprints for creating objects, defining attributes and methods. Objects are instances of classes. Python supports object-oriented programming with features like inheritance, encapsulation, polymorphism, and method overriding. Classes are defined using the 'class' keyword."
+    },
+    {
+      "question": "What is inheritance in Python?",
+      "answer": "Inheritance allows a class to inherit attributes and methods from another class. Python supports single and multiple inheritance. The child class can override parent methods and access parent methods using super(). It promotes code reusability and establishes 'is-a' relationships."
+    },
+    {
+      "question": "What are Python modules and packages?",
+      "answer": "Modules are Python files containing code that can be imported and used in other programs. Packages are directories containing multiple modules with an __init__.py file. They help organize code, promote reusability, and prevent namespace collisions."
+    },
+    {
+      "question": "What is the Python import system?",
+      "answer": "The import system allows you to use code from other modules. Methods include: import module, from module import function, import module as alias, and from module import *. Python searches for modules in sys.path locations and caches imported modules in sys.modules."
+    },
+    {
+      "question": "What are Python exceptions?",
+      "answer": "Exceptions are errors that occur during program execution. Python uses try-except blocks for exception handling, with optional else and finally clauses. Common exceptions include ValueError, TypeError, IndexError, and KeyError. Custom exceptions can be created by inheriting from Exception class."
+    },
+    {
+      "question": "What is the difference between '==' and 'is' in Python?",
+      "answer": "'==' compares the values of objects for equality, while 'is' compares object identity (whether they're the same object in memory). Use '==' for value comparison and 'is' for identity comparison, especially with None, True, and False."
+    },
+    {
+      "question": "What are Python generators?",
+      "answer": "Generators are functions that return iterators, yielding values one at a time using the 'yield' keyword instead of 'return'. They're memory-efficient for large datasets, maintain state between calls, and can be created using generator expressions or functions."
+    },
+    {
+      "question": "What are Python decorators?",
+      "answer": "Decorators are functions that modify or extend the behavior of other functions or classes without permanently modifying them. They use the @decorator syntax and are commonly used for logging, timing, authentication, and caching. They follow the wrapper function pattern."
+    },
+    {
+      "question": "What is the Global Interpreter Lock (GIL)?",
+      "answer": "GIL is a mutex that protects access to Python objects, preventing multiple threads from executing Python bytecode simultaneously. It simplifies memory management but limits true parallelism in CPU-bound tasks. It doesn't affect I/O-bound tasks significantly."
+    },
+    {
+      "question": "What are Python lambda functions?",
+      "answer": "Lambda functions are small, anonymous functions defined using the 'lambda' keyword. They can have multiple arguments but only one expression. They're commonly used with functions like map(), filter(), and sort(), and in functional programming patterns."
+    },
+    {
+      "question": "What is the difference between shallow and deep copy?",
+      "answer": "Shallow copy creates a new object but references to nested objects remain the same. Deep copy creates a new object and recursively copies all nested objects. Use copy.copy() for shallow copy and copy.deepcopy() for deep copy."
+    },
+    {
+      "question": "What are Python iterators and iterables?",
+      "answer": "Iterables are objects that can be iterated over (like lists, strings, dictionaries). Iterators are objects that implement __iter__() and __next__() methods. The iter() function creates iterators from iterables, and iterators are used in for loops and comprehensions."
+    },
+    {
+      "question": "What is the difference between range() and xrange()?",
+      "answer": "In Python 2, range() returns a list while xrange() returns an iterator. In Python 3, only range() exists and behaves like Python 2's xrange(), returning an iterator for memory efficiency. This change improves performance for large ranges."
+    },
+    {
+      "question": "What are Python context managers?",
+      "answer": "Context managers define runtime context for code execution using 'with' statements. They implement __enter__() and __exit__() methods. Common use cases include file handling, database connections, and resource management. The contextlib module provides utilities for creating context managers."
+    },
+    {
+      "question": "What is the difference between append() and extend() methods?",
+      "answer": "append() adds a single element to the end of a list, while extend() adds all elements from an iterable to the end of a list. append() increases list length by 1, while extend() increases it by the number of elements in the iterable."
+    },
+    {
+      "question": "What are Python metaclasses?",
+      "answer": "Metaclasses are classes whose instances are classes themselves. They control class creation and can modify class behavior. The default metaclass is 'type'. Metaclasses are used for advanced scenarios like ORMs, API frameworks, and design pattern implementations."
+    },
+    {
+      "question": "What is method resolution order (MRO)?",
+      "answer": "MRO determines the order in which base classes are searched when looking for a method in inheritance hierarchies. Python uses C3 linearization algorithm to resolve MRO. You can view MRO using ClassName.__mro__ or ClassName.mro()."
+    },
+    {
+      "question": "What are Python property decorators?",
+      "answer": "Property decorators (@property, @setter, @deleter) allow methods to be accessed like attributes while maintaining encapsulation. They provide getter, setter, and deleter functionality, enabling data validation and computed properties in classes."
+    },
+    {
+      "question": "What is the difference between staticmethod and classmethod?",
+      "answer": "@staticmethod doesn't receive any automatic arguments and behaves like a regular function. @classmethod receives the class as the first argument (cls) and can access class variables. Static methods are utility functions, class methods are alternative constructors."
+    },
+    {
+      "question": "What are Python file operations?",
+      "answer": "Python provides built-in functions for file operations: open() to open files, read()/readline()/readlines() to read content, write()/writelines() to write content, and close() to close files. Context managers (with statements) ensure proper file handling."
+    },
+    {
+      "question": "What is the difference between local and global variables?",
+      "answer": "Local variables are defined inside functions and have local scope. Global variables are defined outside functions and have global scope. Use 'global' keyword to modify global variables inside functions. Python follows LEGB rule for variable resolution."
+    },
+    {
+      "question": "What are Python regular expressions?",
+      "answer": "Regular expressions (regex) are patterns used to match strings. Python's 're' module provides functions like search(), match(), findall(), and sub(). Regex patterns use special characters and metacharacters to define search criteria for text processing."
+    },
+    {
+      "question": "What is duck typing in Python?",
+      "answer": "Duck typing is a programming concept where object type is determined by behavior rather than explicit type. 'If it walks like a duck and quacks like a duck, it's a duck.' Python uses duck typing extensively, focusing on what methods an object has rather than its class."
+    },
+    {
+      "question": "What are Python virtual environments?",
+      "answer": "Virtual environments are isolated Python environments that allow different projects to have separate dependencies. Tools like venv, virtualenv, and conda create virtual environments. They prevent dependency conflicts and ensure consistent project environments."
+    },
+    {
+      "question": "What is pip?",
+      "answer": "Pip is Python's package installer that downloads and installs packages from the Python Package Index (PyPI). Common commands include pip install, pip uninstall, pip list, pip show, and pip freeze. It manages dependencies and package versions."
+    },
+    {
+      "question": "What are Python closures?",
+      "answer": "Closures are functions that capture and remember values from their surrounding scope even after the outer function returns. They're created when nested functions reference variables from outer functions. Closures maintain access to outer scope variables."
+    },
+    {
+      "question": "What is the difference between __str__ and __repr__?",
+      "answer": "__str__ returns a human-readable string representation for end users. __repr__ returns an unambiguous string representation for developers, ideally eval()-able. __str__ is used by str() and print(), while __repr__ is used by repr() and in interactive sessions."
+    },
+    {
+      "question": "What are Python sets?",
+      "answer": "Sets are unordered collections of unique elements, implemented as hash tables. They support mathematical set operations like union, intersection, difference, and symmetric difference. Sets are mutable, while frozensets are immutable versions."
+    },
+    {
+      "question": "What is the difference between remove() and discard() for sets?",
+      "answer": "Both remove elements from sets. remove() raises KeyError if element doesn't exist, while discard() doesn't raise an error. Use remove() when you're sure the element exists, use discard() when element might not exist."
+    },
+    {
+      "question": "What are Python magic methods?",
+      "answer": "Magic methods (dunder methods) are special methods with double underscores that define how objects behave with built-in functions and operators. Examples include __init__, __str__, __len__, __add__, __getitem__. They enable operator overloading and customization."
+    },
+    {
+      "question": "What is multiple inheritance in Python?",
+      "answer": "Multiple inheritance allows a class to inherit from multiple parent classes. Python resolves method conflicts using Method Resolution Order (MRO). Use super() carefully with multiple inheritance and be aware of the diamond problem."
+    },
+    {
+      "question": "What are Python data classes?",
+      "answer": "Data classes (introduced in Python 3.7) are classes primarily used to store data. The @dataclass decorator automatically generates special methods like __init__, __repr__, and __eq__. They reduce boilerplate code for simple data-holding classes."
+    },
+    {
+      "question": "What is the difference between threading and multiprocessing?",
+      "answer": "Threading uses multiple threads within a single process, limited by GIL for CPU-bound tasks but good for I/O-bound tasks. Multiprocessing uses multiple processes with separate memory spaces, better for CPU-bound tasks but higher overhead."
+    },
+    {
+      "question": "What are Python async/await keywords?",
+      "answer": "async/await keywords enable asynchronous programming. 'async def' defines coroutines, 'await' pauses execution until awaited operation completes. Used with asyncio for concurrent I/O operations, improving performance for I/O-bound applications."
+    },
+    {
+      "question": "What is the Python collections module?",
+      "answer": "Collections module provides specialized container data types: namedtuple (tuples with named fields), deque (double-ended queue), Counter (counting hashable objects), defaultdict (dict with default values), and OrderedDict (ordered dictionary)."
+    },
+    {
+      "question": "What are Python type hints?",
+      "answer": "Type hints specify expected types for function parameters and return values using annotations. Introduced in Python 3.5, they improve code readability and enable static type checking with tools like mypy. They don't affect runtime behavior."
+    },
+    {
+      "question": "What is the difference between deepcopy and copy?",
+      "answer": "copy.copy() creates shallow copies - new object but shared references to nested objects. copy.deepcopy() creates deep copies - new object with recursively copied nested objects. Deep copy is slower but provides complete independence."
+    },
+    {
+      "question": "What are Python f-strings?",
+      "answer": "F-strings (formatted string literals) provide concise string formatting using f'' or F'' prefix. They embed expressions inside curly braces and are evaluated at runtime. Introduced in Python 3.6, they're faster and more readable than format() or % formatting."
+    },
+    {
+      "question": "What is the enumerate() function?",
+      "answer": "enumerate() returns an iterator of tuples containing indices and values from an iterable. It's commonly used in loops when you need both index and value. You can specify a starting value for the counter."
+    },
+    {
+      "question": "What are Python descriptors?",
+      "answer": "Descriptors are objects that define how attribute access is handled through __get__, __set__, and __delete__ methods. They're used to implement properties, methods, and static methods. Property decorator is built using descriptors."
+    },
+    {
+      "question": "What is the zip() function?",
+      "answer": "zip() combines multiple iterables element-wise, returning an iterator of tuples. It stops when the shortest iterable is exhausted. Useful for parallel iteration and can be used with * operator to unzip sequences."
+    },
+    {
+      "question": "What are Python slots?",
+      "answer": "__slots__ is a class attribute that restricts instance attributes to a predefined set, saving memory by preventing the creation of __dict__ for each instance. It's useful for classes with many instances and fixed attributes."
+    },
+    {
+      "question": "What is the difference between map() and list comprehension?",
+      "answer": "Both apply functions to iterables. List comprehension is more readable and Pythonic, supports filtering with if conditions, and creates lists directly. map() returns an iterator, is slightly faster for simple operations, and works with any function."
+    },
+    {
+      "question": "What are Python coroutines?",
+      "answer": "Coroutines are functions that can be paused and resumed, defined with async def. They're used for asynchronous programming, allowing cooperative multitasking. They must be awaited and are typically used with asyncio event loops."
+    },
+    {
+      "question": "What is the any() and all() functions?",
+      "answer": "any() returns True if any element in an iterable is truthy, False if all are falsy or iterable is empty. all() returns True if all elements are truthy or iterable is empty, False if any element is falsy."
+    },
+    {
+      "question": "What are Python weak references?",
+      "answer": "Weak references don't increase object reference count and don't prevent garbage collection. The weakref module provides weak reference objects that can become None when the referenced object is garbage collected. Useful for avoiding circular references."
+    },
+    {
+      "question": "What is the difference between pickle and json?",
+      "answer": "Pickle serializes Python objects to binary format, supporting all Python types but only readable by Python. JSON serializes to text format, human-readable, cross-language compatible, but supports limited data types (strings, numbers, lists, dicts, booleans, None)."
+    },
+    {
+      "question": "What are Python abstract base classes?",
+      "answer": "Abstract base classes (ABC) define interfaces that subclasses must implement. Using abc module and @abstractmethod decorator, you can create classes that cannot be instantiated directly and enforce method implementation in subclasses."
+    },
+    {
+      "question": "What is the __name__ == '__main__' construct?",
+      "answer": "This construct checks if a Python file is being run directly (not imported). When run directly, __name__ equals '__main__'. It's used to include code that should only execute when the file is the main program, not when imported as a module."
+    },
+    {
+      "question": "What are Python context managers used for?",
+      "answer": "Context managers ensure proper resource management and cleanup. Common uses include file handling, database connections, thread locks, and temporary state changes. They guarantee cleanup code runs even if exceptions occur within the context."
+    },
+    {
+      "question": "What is the difference between return and yield?",
+      "answer": "return terminates function execution and returns a value. yield pauses function execution, returns a value, and maintains function state for resumption. Functions with yield become generators and can produce sequences of values lazily."
+    },
+    {
+      "question": "What are Python namespaces?",
+      "answer": "Namespaces are mappings from names to objects, preventing naming conflicts. Python has built-in, global, enclosing, and local namespaces. The LEGB rule determines name resolution order: Local, Enclosing, Global, Built-in."
+    },
+    {
+      "question": "What is monkey patching?",
+      "answer": "Monkey patching is dynamically modifying classes or modules at runtime. You can add, modify, or delete methods and attributes of existing classes. It's powerful but can make code hard to understand and debug."
+    },
+    {
+      "question": "What are Python wheels?",
+      "answer": "Wheels are built-package format for Python that provides faster installation than source distributions. They contain pre-compiled code and metadata, reducing installation time and dependency requirements. Created with 'pip wheel' command."
+    },
+    {
+      "question": "What is the difference between sort() and sorted()?",
+      "answer": "sort() is a list method that sorts the list in-place and returns None. sorted() is a built-in function that returns a new sorted list from any iterable. Use sort() to modify existing lists, sorted() to create new sorted sequences."
+    },
+    {
+      "question": "What are Python memory management techniques?",
+      "answer": "Python uses automatic memory management with garbage collection, reference counting, and cycle detection. Techniques include using generators for large datasets, del statements for explicit cleanup, weak references to break cycles, and memory profiling tools."
+    },
+    {
+      "question": "What is the __init__.py file?",
+      "answer": "__init__.py makes a directory a Python package. It can be empty or contain initialization code that runs when the package is imported. It can control what gets imported with __all__ and set up package-level variables and functions."
+    },
+    {
+      "question": "What are Python mixins?",
+      "answer": "Mixins are classes designed to be combined with other classes through multiple inheritance. They provide specific functionality without being standalone classes. They promote code reuse and composition over inheritance."
+    },
+    {
+      "question": "What is the difference between __new__ and __init__?",
+      "answer": "__new__ is responsible for creating and returning a new instance (constructor). __init__ initializes the already created instance (initializer). __new__ is called before __init__ and is useful for controlling object creation in metaclasses and singletons."
+    },
+    {
+      "question": "What are Python logging best practices?",
+      "answer": "Use the logging module instead of print statements, set appropriate log levels (DEBUG, INFO, WARNING, ERROR, CRITICAL), use formatters for consistent output, configure handlers for different outputs, and use logger names to organize log messages hierarchically."
+    },
+    {
+      "question": "What is the difference between __getattr__ and __getattribute__?",
+      "answer": "__getattribute__ is called for every attribute access and must be implemented carefully to avoid infinite recursion. __getattr__ is only called when an attribute isn't found through normal lookup. __getattr__ is more commonly used for dynamic attribute access."
+    },
+    {
+      "question": "What are Python unit tests?",
+      "answer": "Unit tests verify individual components work correctly. Python's unittest module provides TestCase class with assertion methods. Tests are organized in test classes and methods starting with 'test_'. Use setUp() and tearDown() for test preparation and cleanup."
+    },
+    {
+      "question": "What is the Global keyword?",
+      "answer": "The 'global' keyword declares that a variable inside a function refers to a global variable. Without it, assignment creates a local variable. Use 'nonlocal' for variables in enclosing scope. Global variables should be used sparingly for better code organization."
+    },
+    {
+      "question": "What are Python coding standards (PEP 8)?",
+      "answer": "PEP 8 defines Python coding style guidelines: 4 spaces for indentation, 79-character line limit, lowercase with underscores for functions and variables, CamelCase for classes, constants in ALL_CAPS, and specific import organization and whitespace rules."
+    },
+    {
+      "question": "What is the __call__ method?",
+      "answer": "__call__ makes objects callable like functions. When an object implements __call__, you can use parentheses to 'call' the object. It's useful for creating function-like objects, decorators, and implementing command patterns."
+    },
+    {
+      "question": "What are Python performance optimization techniques?",
+      "answer": "Optimization techniques include: using built-in functions and libraries, list comprehensions over loops, generators for large datasets, local variable access, avoiding global variable lookups, profiling with cProfile, and using appropriate data structures."
+    },
+    {
+      "question": "What is the difference between break and continue?",
+      "answer": "break terminates loop execution and exits the loop completely. continue skips the current iteration and jumps to the next iteration. Both work with for and while loops and affect the innermost loop in nested loops."
+    },
+    {
+      "question": "What are Python design patterns?",
+      "answer": "Common design patterns in Python include: Singleton (single instance), Factory (object creation), Observer (event notification), Decorator (behavior modification), and Strategy (algorithm selection). Python's features make some patterns simpler to implement."
+    },
+    {
+      "question": "What is the difference between pass, continue, and break?",
+      "answer": "pass is a null operation that does nothing, used as a placeholder. continue skips the rest of current loop iteration and goes to the next. break terminates the loop entirely. Each serves different control flow purposes."
+    },
+    {
+      "question": "What are Python database connections?",
+      "answer": "Python connects to databases using DB-API compliant modules like sqlite3, psycopg2 (PostgreSQL), PyMySQL (MySQL). Common pattern: create connection, create cursor, execute queries, fetch results, commit transactions, close connections. Use context managers for proper cleanup."
+    },
+    {
+      "question": "What is the difference between method and function?",
+      "answer": "Functions are standalone code blocks defined with def. Methods are functions defined inside classes and operate on class instances. Methods automatically receive 'self' as the first parameter, providing access to instance attributes and other methods."
+    },
+    {
+      "question": "What are Python web frameworks?",
+      "answer": "Popular Python web frameworks include Django (full-featured), Flask (micro-framework), FastAPI (modern API framework), Pyramid (flexible), and Tornado (async). Each has different philosophies, complexity levels, and use cases for web development."
+    },
+    {
+      "question": "What is the difference between __del__ and destructor?",
+      "answer": "Python doesn't have traditional destructors like C++. __del__ is a finalizer called when object is about to be garbage collected, but timing is unpredictable. For resource cleanup, use context managers or explicit cleanup methods instead of relying on __del__."
+    },
+    {
+      "question": "What are Python data science libraries?",
+      "answer": "Key data science libraries include: NumPy (numerical computing), Pandas (data manipulation), Matplotlib/Seaborn (visualization), Scikit-learn (machine learning), TensorFlow/PyTorch (deep learning), Jupyter (interactive computing), and SciPy (scientific computing)."
+    },
+    {
+      "question": "What is the difference between local() and globals()?",
+      "answer": "locals() returns a dictionary of current local symbol table, globals() returns global symbol table. locals() is read-only in function scope, globals() is modifiable. Both provide access to variable namespaces for introspection and dynamic programming."
+    },
+    {
+      "question": "What are Python testing frameworks?",
+      "answer": "Testing frameworks include: unittest (built-in), pytest (popular third-party), nose (legacy), doctest (documentation testing). Pytest is widely preferred for its simple syntax, fixtures, parametrization, and extensive plugin ecosystem."
+    },
+    {
+      "question": "What is the __slots__ optimization?",
+      "answer": "__slots__ restricts instance attributes to a predefined list, eliminating __dict__ storage. This saves memory for classes with many instances but limits dynamic attribute addition. It's an optimization for memory-constrained applications with fixed attributes."
+    },
+    {
+      "question": "What are Python web scraping libraries?",
+      "answer": "Web scraping libraries include: requests (HTTP requests), BeautifulSoup (HTML parsing), Scrapy (comprehensive framework), selenium (browser automation), lxml (XML/HTML parsing), and urllib (built-in HTTP library). Each serves different scraping needs."
+    },
+    {
+      "question": "What is the difference between exec() and eval()?",
+      "answer": "eval() evaluates and returns the result of a single expression. exec() executes statements and doesn't return values. eval() works with expressions only, exec() works with any Python code. Both execute strings as Python code dynamically."
+    },
+    {
+      "question": "What are Python security considerations?",
+      "answer": "Security considerations include: input validation and sanitization, avoiding eval() and exec() with user input, using parameterized queries to prevent SQL injection, validating file uploads, using HTTPS, implementing proper authentication and authorization, and keeping dependencies updated."
+    },
+    {
+      "question": "What is the difference between __enter__ and __exit__?",
+      "answer": "__enter__ is called when entering a 'with' block and returns the resource to be managed. __exit__ is called when leaving the block (normally or via exception) and handles cleanup. Together they implement the context manager protocol."
+    },
+    {
+      "question": "What are Python REST API frameworks?",
+      "answer": "REST API frameworks include: Flask-RESTful (Flask extension), Django REST Framework (Django extension), FastAPI (modern async framework), Falcon (minimalist), and Tornado (async). Each provides different levels of features and performance characteristics."
+    },
+    {
+      "question": "What is the difference between composition and inheritance?",
+      "answer": "Inheritance creates 'is-a' relationships where child classes inherit from parent classes. Composition creates 'has-a' relationships where classes contain other classes as attributes. Composition is often preferred for flexibility and avoiding complex inheritance hierarchies."
+    },
+    {
+      "question": "What are Python GUI frameworks?",
+      "answer": "GUI frameworks include: Tkinter (built-in), PyQt/PySide (Qt bindings), wxPython (cross-platform), Kivy (mobile/multi-touch), Dear PyGui (modern), and Flet (Flutter-based). Each has different capabilities, licensing, and platform support."
+    },
+    {
+      "question": "What is the __hash__ method?",
+      "answer": "__hash__ returns an integer hash value for an object, enabling its use in sets and as dictionary keys. Objects that are equal must have the same hash value. Immutable objects should implement __hash__, mutable objects should not."
+    },
+    {
+      "question": "What are Python deployment strategies?",
+      "answer": "Deployment strategies include: virtual environments for isolation, Docker containers for consistency, cloud platforms (AWS, GCP, Azure), Platform-as-a-Service (Heroku, PythonAnywhere), serverless functions (Lambda), and traditional server deployment with WSGI/ASGI servers."
+    },
+    {
+      "question": "What is the difference between __eq__ and __hash__?",
+      "answer": "__eq__ defines equality comparison between objects. __hash__ provides hash values for use in sets and dictionaries. If you override __eq__, you should also override __hash__ to maintain the invariant that equal objects have equal hash values."
+    },
+    {
+      "question": "What are Python concurrency patterns?",
+      "answer": "Concurrency patterns include: threading for I/O-bound tasks, multiprocessing for CPU-bound tasks, asyncio for asynchronous I/O, concurrent.futures for high-level interfaces, queue module for thread communication, and locks for synchronization."
+    },
+    {
+      "question": "What is the difference between bound and unbound methods?",
+      "answer": "In Python 3, all methods are bound when accessed through instances, automatically receiving 'self'. Unbound methods don't exist in Python 3. In Python 2, accessing methods through classes gave unbound methods that required explicit instance passing."
+    },
+    {
+      "question": "What are Python package management tools?",
+      "answer": "Package management tools include: pip (package installer), pipenv (dependency management), poetry (modern dependency management), conda (scientific packages), requirements.txt (dependency specification), and setup.py/pyproject.toml (package configuration)."
+    },
+    {
+      "question": "What is the __bool__ method?",
+      "answer": "__bool__ defines truthiness of objects in boolean contexts. If not defined, Python uses __len__ (empty collections are falsy). Objects are truthy by default. Implementing __bool__ allows custom truthiness logic for your classes."
+    },
+    {
+      "question": "What are Python profiling tools?",
+      "answer": "Profiling tools include: cProfile (built-in profiler), profile (pure Python profiler), line_profiler (line-by-line profiling), memory_profiler (memory usage), py-spy (sampling profiler), and timeit (micro-benchmarking). They help identify performance bottlenecks."
+    },
+    {
+      "question": "What is the difference between __getitem__ and __setitem__?",
+      "answer": "__getitem__ handles item access using square brackets (obj[key]). __setitem__ handles item assignment (obj[key] = value). Together with __delitem__, they enable custom indexing behavior for user-defined classes."
+    },
+    {
+      "question": "What are Python documentation tools?",
+      "answer": "Documentation tools include: Sphinx (comprehensive documentation), docstrings (inline documentation), pydoc (built-in documentation), Read the Docs (hosting), MkDocs (markdown-based), and type hints for API documentation. Good documentation improves code maintainability."
+    },
+    {
+      "question": "What is the __iter__ method?",
+      "answer": "__iter__ makes objects iterable by returning an iterator. The iterator must implement __next__ and __iter__ methods. This enables use in for loops, comprehensions, and with built-in functions like sum(), max(), and min()."
+    },
+    {
+      "question": "What are Python code quality tools?",
+      "answer": "Code quality tools include: flake8 (style checking), pylint (comprehensive analysis), black (code formatting), isort (import sorting), mypy (type checking), bandit (security analysis), and pre-commit (git hooks). They maintain code consistency and quality."
+    },
+    {
+      "question": "What is the difference between __add__ and __radd__?",
+      "answer": "__add__ handles addition when the object is the left operand (a + b). __radd__ handles addition when the object is the right operand and the left operand doesn't support the operation. This enables flexible operator overloading."
+    },
+    {
+      "question": "What are Python debugging techniques?",
+      "answer": "Debugging techniques include: print statements, pdb debugger (built-in), IDE debuggers, logging for production debugging, assert statements for development, exception handling with detailed messages, and unit tests for preventing bugs."
+    },
+    {
+      "question": "What is the __len__ method?",
+      "answer": "__len__ returns the length of an object and enables use with len() function. It should return a non-negative integer. Objects with __len__ are considered sequences or collections and can be used in boolean contexts (empty = falsy)."
+    },
+    {
+      "question": "What are Python development best practices?",
+      "answer": "Best practices include: following PEP 8 style guide, writing comprehensive tests, using virtual environments, proper error handling, meaningful variable names, modular code organization, documentation, version control, code reviews, and continuous integration."
+    },
+    {
+      "question": "What is the __contains__ method?",
+      "answer": "__contains__ implements membership testing with 'in' operator (item in container). If not defined, Python falls back to iteration or __getitem__. Implementing __contains__ can provide more efficient membership testing for custom collections."
+    },
+    {
+      "question": "What are Python microservices patterns?",
+      "answer": "Microservices patterns include: API Gateway (single entry point), Service Discovery (finding services), Circuit Breaker (fault tolerance), Event Sourcing (state changes as events), CQRS (command query separation), and containerization with Docker and Kubernetes."
+    },
+    {
+      "question": "What is the __format__ method?",
+      "answer": "__format__ customizes string formatting with format() function and f-strings. It receives a format specification string and returns formatted output. This enables custom formatting for user-defined classes in string templates."
+    },
+    {
+      "question": "What are Python machine learning workflows?",
+      "answer": "ML workflows include: data collection and cleaning, exploratory data analysis, feature engineering, model selection and training, validation and testing, hyperparameter tuning, model deployment, monitoring, and continuous improvement. Libraries like scikit-learn facilitate these workflows."
+    },
+    {
+      "question": "What is the difference between __dict__ and vars()?",
+      "answer": "__dict__ is an attribute containing an object's namespace as a dictionary. vars() is a built-in function that returns __dict__ for objects or locals() when called without arguments. Both provide access to object attributes."
+    },
+    {
+      "question": "What are Python async programming patterns?",
+      "answer": "Async patterns include: coroutines with async/await, event loops with asyncio, async context managers, async generators, async comprehensions, concurrent execution with gather(), task management, and proper exception handling in async code."
+    },
+    {
+      "question": "What is the __reversed__ method?",
+      "answer": "__reversed__ returns a reverse iterator for an object, enabling use with reversed() function. If not implemented, reversed() falls back to using __len__ and __getitem__. Implementing __reversed__ can provide more efficient reverse iteration."
+    },
+    {
+      "question": "What are Python deployment automation tools?",
+      "answer": "Deployment automation tools include: Ansible (configuration management), Docker (containerization), Kubernetes (orchestration), Jenkins (CI/CD), GitHub Actions (CI/CD), Fabric (deployment automation), and cloud-specific tools like AWS CloudFormation and Terraform."
+    },
+    {
+      "question": "What is the future of Python?",
+      "answer": "Python's future includes: continued performance improvements, better async support, enhanced type system, pattern matching (introduced in 3.10), structural pattern matching, better error messages, performance optimizations, and growing adoption in AI, data science, and web development."
+    }
+  ]
+}
