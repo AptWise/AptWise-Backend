@@ -1,0 +1,500 @@
+{
+  "questions": [
+    {
+      "question": "What is React?",
+      "answer": "React is a JavaScript library developed by Facebook for building user interfaces, particularly single-page applications. It allows developers to create reusable UI components and efficiently update the user interface when data changes using a virtual DOM."
+    },
+    {
+      "question": "What is JSX?",
+      "answer": "JSX (JavaScript XML) is a syntax extension for JavaScript that allows you to write HTML-like code within JavaScript. It gets transpiled by tools like Babel into React.createElement() calls, making React code more readable and maintainable."
+    },
+    {
+      "question": "What is the Virtual DOM?",
+      "answer": "The Virtual DOM is a JavaScript representation of the real DOM kept in memory. React uses it to optimize performance by calculating the minimum changes needed when state updates occur, then efficiently updating only the necessary parts of the actual DOM."
+    },
+    {
+      "question": "What are React components?",
+      "answer": "React components are reusable pieces of UI that accept inputs (props) and return JSX elements. They can be either functional components (JavaScript functions) or class components (ES6 classes extending React.Component)."
+    },
+    {
+      "question": "What is the difference between state and props?",
+      "answer": "Props are read-only data passed from parent to child components, while state is mutable data managed within a component. Props flow down the component tree, whereas state is local to the component that declares it and can trigger re-renders when changed."
+    },
+    {
+      "question": "What is the useState hook?",
+      "answer": "useState is a React hook that allows functional components to have state. It returns an array with the current state value and a function to update that state. When state is updated, React re-renders the component."
+    },
+    {
+      "question": "What is the useEffect hook?",
+      "answer": "useEffect is a hook that allows you to perform side effects in functional components. It combines the functionality of componentDidMount, componentDidUpdate, and componentWillUnmount from class components into a single API."
+    },
+    {
+      "question": "What are controlled components?",
+      "answer": "Controlled components are form elements whose values are controlled by React state. The component's state becomes the single source of truth, and every state mutation has an associated handler function."
+    },
+    {
+      "question": "What are uncontrolled components?",
+      "answer": "Uncontrolled components are form elements that maintain their own internal state. You access their values using refs rather than handling every state change through React state."
+    },
+    {
+      "question": "What are React keys and why are they important?",
+      "answer": "Keys are special string attributes used when creating lists of elements. They help React identify which items have changed, been added, or removed, enabling efficient updates to the virtual DOM and maintaining component state correctly."
+    },
+    {
+      "question": "What is the component lifecycle in React?",
+      "answer": "Component lifecycle refers to the sequence of methods invoked during different stages of a component's existence: mounting (creation), updating (re-rendering), and unmounting (destruction). In functional components, useEffect handles lifecycle events."
+    },
+    {
+      "question": "What is React Router?",
+      "answer": "React Router is a standard library for routing in React applications. It enables navigation between different views, manages browser history, and keeps the UI in sync with the URL using declarative routing components."
+    },
+    {
+      "question": "What is the Context API?",
+      "answer": "Context API provides a way to pass data through the component tree without prop drilling. It's designed for sharing data that can be considered 'global' for a tree of components, such as authentication status or theme preferences."
+    },
+    {
+      "question": "What are Higher-Order Components (HOCs)?",
+      "answer": "HOCs are functions that take a component and return a new component with additional functionality. They're used for code reuse, cross-cutting concerns like authentication, logging, or data fetching, following the higher-order function pattern."
+    },
+    {
+      "question": "What is Redux?",
+      "answer": "Redux is a predictable state container for JavaScript applications. It manages application state in a single store using actions and reducers, providing a consistent way to handle state changes across the entire application."
+    },
+    {
+      "question": "What are React Hooks?",
+      "answer": "React Hooks are functions that let you use state and other React features in functional components. They solve problems like sharing stateful logic between components and eliminate the need for class components in most cases."
+    },
+    {
+      "question": "What is the useReducer hook?",
+      "answer": "useReducer is a hook for managing complex state logic. It accepts a reducer function and initial state, returning the current state and a dispatch function. It's preferable to useState when you have complex state logic or multiple sub-values."
+    },
+    {
+      "question": "What is prop drilling?",
+      "answer": "Prop drilling is the process of passing data from a parent component down to deeply nested child components through intermediate components that don't need the data. It can be avoided using Context API, Redux, or component composition."
+    },
+    {
+      "question": "What are React Fragments?",
+      "answer": "React Fragments let you group multiple children elements without adding extra DOM nodes. They're useful when a component needs to return multiple elements but you don't want unnecessary wrapper divs."
+    },
+    {
+      "question": "What is React.memo()?",
+      "answer": "React.memo() is a higher-order component that memoizes functional components, preventing unnecessary re-renders when props haven't changed. It performs a shallow comparison of props by default."
+    },
+    {
+      "question": "What is the useCallback hook?",
+      "answer": "useCallback returns a memoized callback function that only changes when its dependencies change. It's useful for preventing unnecessary re-renders of child components that rely on reference equality."
+    },
+    {
+      "question": "What is the useMemo hook?",
+      "answer": "useMemo returns a memoized value that only recalculates when its dependencies change. It's used to optimize expensive calculations and prevent them from running on every render."
+    },
+    {
+      "question": "What are the Rules of Hooks?",
+      "answer": "The Rules of Hooks state that hooks must only be called at the top level of React functions, never inside loops, conditions, or nested functions. They should only be called from React function components or custom hooks."
+    },
+    {
+      "question": "What is server-side rendering (SSR)?",
+      "answer": "SSR is the process of rendering React components on the server and sending fully rendered HTML to the client. This improves initial page load time, SEO, and provides better user experience, especially on slower devices."
+    },
+    {
+      "question": "What are synthetic events?",
+      "answer": "Synthetic events are React's wrapper around native DOM events. They provide a consistent API across different browsers and include methods like preventDefault() and stopPropagation(). They're automatically pooled for performance in older React versions."
+    },
+    {
+      "question": "What are error boundaries?",
+      "answer": "Error boundaries are React components that catch JavaScript errors anywhere in their child component tree. They log errors and display fallback UI instead of crashing the entire application, working like try-catch blocks for components."
+    },
+    {
+      "question": "What is lazy loading in React?",
+      "answer": "Lazy loading is a technique to load components only when needed, reducing initial bundle size. React provides React.lazy() for dynamic imports and code splitting, working with Suspense to show fallback content during loading."
+    },
+    {
+      "question": "What are portals in React?",
+      "answer": "Portals provide a way to render children into a DOM node outside the parent component's DOM hierarchy. They're useful for modals, tooltips, and dropdowns that need to break out of their container's styling constraints."
+    },
+    {
+      "question": "What is reconciliation?",
+      "answer": "Reconciliation is React's process of updating the DOM efficiently. When state changes, React creates a new virtual DOM tree, compares it with the previous tree (diffing), and updates only the parts that actually changed."
+    },
+    {
+      "question": "What are custom hooks?",
+      "answer": "Custom hooks are JavaScript functions whose names start with 'use' and may call other hooks. They allow you to extract and reuse stateful logic across multiple components, promoting code reuse and separation of concerns."
+    },
+    {
+      "question": "What is the difference between componentDidMount and useEffect?",
+      "answer": "componentDidMount runs once after a class component mounts. useEffect can replicate this with an empty dependency array, but it's more versatile, handling mounting, updating, and cleanup in functional components."
+    },
+    {
+      "question": "What are render props?",
+      "answer": "Render props is a pattern where a component takes a function as a prop that returns a React element. This function receives data or methods from the component, allowing flexible composition and logic sharing."
+    },
+    {
+      "question": "What is the difference between shallow and deep comparison?",
+      "answer": "Shallow comparison checks if object references have changed, not their contents. Deep comparison recursively checks actual contents. React uses shallow comparison by default for performance, which is why immutability is important."
+    },
+    {
+      "question": "What are performance optimization techniques in React?",
+      "answer": "Key techniques include: React.memo for component memoization, useCallback and useMemo for expensive operations, code splitting with React.lazy, proper key usage in lists, avoiding anonymous functions in JSX, and implementing virtualization for large lists."
+    },
+    {
+      "question": "What is the difference between React and React DOM?",
+      "answer": "React is the core library providing the component model and state management. React DOM is a separate package that provides DOM-specific methods and serves as the entry point for rendering React components to the web browser."
+    },
+    {
+      "question": "What are different ways to style React components?",
+      "answer": "Styling options include: CSS stylesheets, inline styles, CSS modules, styled-components (CSS-in-JS), emotion library, CSS preprocessors like Sass, utility frameworks like Tailwind CSS, and traditional CSS frameworks like Bootstrap."
+    },
+    {
+      "question": "What is React StrictMode?",
+      "answer": "StrictMode is a development tool that highlights potential problems by intentionally double-invoking functions and methods. It helps identify unsafe lifecycles, deprecated APIs, unexpected side effects, and ensures components work with concurrent features."
+    },
+    {
+      "question": "What are different types of testing in React?",
+      "answer": "Testing types include: unit testing (individual components), integration testing (component interactions), end-to-end testing (complete workflows), snapshot testing (component output), and visual regression testing. Common tools are Jest, React Testing Library, and Cypress."
+    },
+    {
+      "question": "What is the difference between React and Vue.js?",
+      "answer": "React is a library focused on UI with a large ecosystem, uses JSX, and requires additional libraries for complete functionality. Vue.js is a complete framework with built-in features, uses HTML templates, and has a gentler learning curve."
+    },
+    {
+      "question": "What are React DevTools?",
+      "answer": "React DevTools is a browser extension that adds React debugging capabilities to developer tools. It allows inspecting component trees, viewing/editing props and state, profiling performance, and debugging hooks."
+    },
+    {
+      "question": "What is code splitting?",
+      "answer": "Code splitting divides your application into smaller chunks that load on demand. In React, it's implemented using dynamic imports with React.lazy() or webpack's import() function, reducing initial bundle size and improving performance."
+    },
+    {
+      "question": "What are new features in React 18?",
+      "answer": "React 18 introduced concurrent features like automatic batching, startTransition for non-urgent updates, useDeferredValue for expensive operations, Suspense improvements, new hooks like useId, and the createRoot API replacing ReactDOM.render."
+    },
+    {
+      "question": "What is the difference between useLayoutEffect and useEffect?",
+      "answer": "useEffect runs after the render is committed to screen (asynchronously). useLayoutEffect runs synchronously after DOM mutations but before browser paint, making it suitable for DOM measurements or synchronous updates."
+    },
+    {
+      "question": "What are React refs?",
+      "answer": "Refs provide direct access to DOM nodes or component instances. Use them for focus management, text selection, media playback, triggering animations, or integrating with third-party DOM libraries. Avoid using refs for declarative tasks."
+    },
+    {
+      "question": "What is forwardRef?",
+      "answer": "forwardRef allows a component to expose a DOM node to its parent component through a ref. It's useful when you need to pass refs through component boundaries, especially in reusable component libraries."
+    },
+    {
+      "question": "What is useImperativeHandle?",
+      "answer": "useImperativeHandle customizes the instance value exposed to parent components when using refs. It allows exposing only specific methods or properties instead of the entire DOM node, providing controlled access to component internals."
+    },
+    {
+      "question": "What are React development best practices?",
+      "answer": "Best practices include: using functional components with hooks, keeping components small and focused, following naming conventions, using PropTypes or TypeScript, avoiding direct state mutations, proper key usage, implementing error boundaries, and following single responsibility principle."
+    },
+    {
+      "question": "What is the difference between React elements and components?",
+      "answer": "React elements are plain objects describing what should appear on screen, created by JSX or React.createElement(). Components are functions or classes that return elements. Elements are the building blocks that components produce."
+    },
+    {
+      "question": "What are lifecycle methods in class components?",
+      "answer": "Lifecycle methods include: Mounting (constructor, componentDidMount), Updating (componentDidUpdate, getSnapshotBeforeUpdate), Unmounting (componentWillUnmount), and Error Handling (componentDidCatch, getDerivedStateFromError)."
+    },
+    {
+      "question": "What is the purpose of keys in React lists?",
+      "answer": "Keys help React identify which list items have changed, been added, or removed. They should be stable, predictable, and unique among siblings, allowing React to efficiently update the virtual DOM and maintain component state correctly."
+    },
+    {
+      "question": "What are different ways to handle forms in React?",
+      "answer": "Form handling approaches include: controlled components (React state manages form data), uncontrolled components (DOM manages data with refs), form libraries like Formik or React Hook Form, and custom hooks for form management."
+    },
+    {
+      "question": "What is React.PureComponent?",
+      "answer": "React.PureComponent is a class component that automatically implements shouldComponentUpdate with shallow prop and state comparison. It prevents unnecessary re-renders when props and state haven't changed, unlike regular React.Component."
+    },
+    {
+      "question": "What are common state management patterns?",
+      "answer": "Patterns include: local component state with useState, lifting state up to common ancestors, Context API for global state, external libraries like Redux or Zustand, and compound component patterns for complex UI state."
+    },
+    {
+      "question": "What is React.createElement()?",
+      "answer": "React.createElement() is the function that creates React elements. JSX is syntactic sugar that gets transpiled to React.createElement() calls. It takes the element type, props, and children as arguments."
+    },
+    {
+      "question": "What are security considerations in React?",
+      "answer": "Security considerations include: sanitizing user input to prevent XSS, using HTTPS, implementing proper authentication/authorization, avoiding dangerouslySetInnerHTML, validating props and state, and keeping dependencies updated for security patches."
+    },
+    {
+      "question": "What is the difference between stateful and stateless components?",
+      "answer": "Stateful components manage their own state and can change over time using useState or class state. Stateless components don't manage internal state and render consistently for the same props. They're also called presentational or dumb components."
+    },
+    {
+      "question": "What are advantages of TypeScript with React?",
+      "answer": "TypeScript provides: static type checking to catch errors early, better IDE support with autocomplete, improved code documentation, easier maintenance of large codebases, better team collaboration through explicit interfaces, and enhanced developer experience."
+    },
+    {
+      "question": "What is Babel's role in React development?",
+      "answer": "Babel is a JavaScript compiler that transforms JSX syntax and modern JavaScript features into browser-compatible code. It's essential for React development since browsers don't natively understand JSX, enabling use of cutting-edge language features."
+    },
+    {
+      "question": "What build tools are used with React?",
+      "answer": "Common build tools include: Create React App for quick setup, Webpack for module bundling, Vite for fast development, Parcel for zero-configuration bundling, Rollup for libraries, and Next.js for full-stack applications with optimization."
+    },
+    {
+      "question": "What are common debugging techniques in React?",
+      "answer": "Debugging techniques include: React DevTools for component inspection, console.logging for value tracking, debugger statements with browser tools, error boundaries for error catching, React DevTools Profiler for performance, and unit testing for early bug detection."
+    },
+    {
+      "question": "What is the difference between shallow and full rendering in testing?",
+      "answer": "Shallow rendering tests components in isolation by rendering only one level deep without child components. Full rendering (mount) renders the complete component tree including children, testing integration and interactions."
+    },
+    {
+      "question": "What are common React anti-patterns?",
+      "answer": "Anti-patterns include: directly mutating state, using array indices as keys, not using keys in lists, overusing refs, creating components inside render methods, not cleaning up useEffect subscriptions, excessive prop drilling, and ignoring single responsibility principle."
+    },
+    {
+      "question": "What are different data fetching methods in React?",
+      "answer": "Data fetching methods include: fetch API or axios in useEffect, custom hooks for data fetching, libraries like SWR or React Query, GraphQL with Apollo Client, server-side rendering for initial data, and Suspense for concurrent data fetching."
+    },
+    {
+      "question": "What is the difference between local and global state?",
+      "answer": "Use local state when data is only needed by a component and its direct children. Use global state when data needs sharing across unrelated components, persisting across route changes, or when multiple components update the same data."
+    },
+    {
+      "question": "What is React's reconciliation algorithm?",
+      "answer": "React's reconciliation algorithm compares new and previous virtual DOM trees to determine minimum changes needed for the real DOM. It uses heuristics: different element types produce different trees, and keys hint at stable child elements, making it O(n) complexity."
+    },
+    {
+      "question": "What are benefits of React Hooks over class components?",
+      "answer": "Benefits include: simpler syntax without class complexity, easier logic sharing between components, better performance optimization, no method binding needed, clearer separation of concerns, easier testing, and elimination of common class component pitfalls."
+    },
+    {
+      "question": "What is the difference between React.cloneElement and React.Children.map?",
+      "answer": "React.cloneElement creates a copy of a single element with new props, useful for modifying one child. React.Children.map iterates over multiple children returning a new array, useful for transforming or modifying all children."
+    },
+    {
+      "question": "What are performance implications of inline functions in JSX?",
+      "answer": "Inline functions create new instances on every render, potentially causing unnecessary re-renders of child components that rely on reference equality. Mitigate using useCallback, moving functions outside components, or using stable references."
+    },
+    {
+      "question": "What is the purpose of dependency arrays in useEffect?",
+      "answer": "Dependency arrays control when effects re-run. Empty array means run once after mount. Including variables means run when those variables change. Omitting the array means run after every render. Proper dependencies prevent bugs and optimize performance."
+    },
+    {
+      "question": "What is the difference between ReactDOM.render and createRoot?",
+      "answer": "In React 18, ReactDOM.render is replaced with createRoot().render(). The new API supports concurrent features, automatic batching, and better error handling. Legacy ReactDOM.render works in legacy mode without concurrent features."
+    },
+    {
+      "question": "What are common mistakes when learning React?",
+      "answer": "Common mistakes include: mutating state directly, improper key usage in lists, overusing refs instead of declarative approaches, not cleaning up effects, mixing controlled/uncontrolled components, misunderstanding lifecycle, and trying to use state immediately after setState."
+    },
+    {
+      "question": "What is webpack's role in React applications?",
+      "answer": "Webpack bundles JavaScript modules and assets for React applications. It handles JSX transformation, CSS processing, image optimization, code splitting, hot module replacement for development, and optimization for production builds."
+    },
+    {
+      "question": "What are emerging trends in React?",
+      "answer": "Emerging trends include: Server Components for better performance, concurrent features for improved UX, enhanced Suspense for data fetching, better TypeScript integration, improved developer tools, performance focus, meta-framework integration, and functional programming evolution."
+    },
+    {
+      "question": "What is the difference between development and production builds?",
+      "answer": "Development builds include warnings, debugging information, and are larger but faster to build. Production builds are optimized with minification, dead code elimination, smaller size, and better performance but harder to debug. Always use production for deployment."
+    },
+    {
+      "question": "What are accessibility considerations in React?",
+      "answer": "Accessibility considerations include: using semantic HTML elements, providing alt text for images, proper focus management, keyboard navigation, ARIA attributes when needed, color contrast ratios, skip links, and testing with screen readers and accessibility tools."
+    },
+    {
+      "question": "What is the difference between React and Angular?",
+      "answer": "React is a UI library with flexible ecosystem, uses JavaScript/TypeScript and JSX, follows functional patterns. Angular is a full framework with built-in features, uses TypeScript by default, follows object-oriented patterns, has steeper learning curve but more structure."
+    },
+    {
+      "question": "What are best practices for React project organization?",
+      "answer": "Best practices include: organizing by features rather than file types, keeping related files together, consistent naming conventions, separating concerns (components, hooks, utilities), creating reusable components, clear folder hierarchy, and documenting architectural decisions."
+    },
+    {
+      "question": "What is React Fiber?",
+      "answer": "React Fiber is the new reconciliation algorithm that enables incremental rendering. It allows React to pause and resume work to maintain smooth user interactions, prioritize urgent updates, and better handle complex applications with many components."
+    },
+    {
+      "question": "What is the useContext hook?",
+      "answer": "useContext is a hook that allows functional components to consume context values without using Consumer components. It accepts a context object and returns the current context value, making it easier to access shared data."
+    },
+    {
+      "question": "What are controlled vs uncontrolled inputs?",
+      "answer": "Controlled inputs have their values managed by React state with onChange handlers. Uncontrolled inputs manage their own state internally and are accessed using refs. Controlled inputs provide better control and validation capabilities."
+    },
+    {
+      "question": "What is the difference between React.memo and PureComponent?",
+      "answer": "React.memo is for functional components and performs shallow comparison of props to prevent re-renders. PureComponent is for class components and does shallow comparison of both props and state. Both optimize performance by preventing unnecessary renders."
+    },
+    {
+      "question": "What are React's built-in hooks?",
+      "answer": "Built-in hooks include: useState (state management), useEffect (side effects), useContext (context consumption), useReducer (complex state), useCallback (memoized callbacks), useMemo (memoized values), useRef (refs), useLayoutEffect (synchronous effects), and more."
+    },
+    {
+      "question": "What is event delegation in React?",
+      "answer": "React uses event delegation by attaching a single event listener to the document root and managing all events through this single listener. This improves performance and ensures consistent event handling across different browsers."
+    },
+    {
+      "question": "What are React Suspense boundaries?",
+      "answer": "Suspense boundaries are components that catch loading states from lazy-loaded components or data fetching. They display fallback UI while waiting for asynchronous operations to complete, providing better user experience during loading states."
+    },
+    {
+      "question": "What is the difference between componentDidUpdate and useEffect?",
+      "answer": "componentDidUpdate runs after every update in class components with access to previous props and state. useEffect with dependencies can replicate this behavior in functional components, running when specified dependencies change."
+    },
+    {
+      "question": "What are React patterns for component composition?",
+      "answer": "Composition patterns include: children props for flexible content, render props for sharing logic, compound components for related UI pieces, higher-order components for enhancing functionality, and hooks for sharing stateful logic."
+    },
+    {
+      "question": "What is the React.Children utility?",
+      "answer": "React.Children provides utilities for working with the opaque children data structure. It includes methods like map, forEach, count, only, and toArray for manipulating and inspecting children elements safely."
+    },
+    {
+      "question": "What are React's synthetic event properties?",
+      "answer": "Synthetic events wrap native events providing consistent properties across browsers: type, target, currentTarget, preventDefault(), stopPropagation(), nativeEvent (access to original event), and other standard event properties with cross-browser compatibility."
+    },
+    {
+      "question": "What is the difference between useState and useReducer for complex state?",
+      "answer": "useState is simpler for basic state. useReducer is better for complex state with multiple sub-values, when next state depends on previous state, or when you need predictable state transitions. useReducer also helps with testing and debugging complex logic."
+    },
+    {
+      "question": "What are React performance profiling techniques?",
+      "answer": "Profiling techniques include: React DevTools Profiler for component performance, browser Performance tab for overall performance, React.Profiler API for programmatic profiling, measuring custom metrics, identifying unnecessary re-renders, and analyzing bundle sizes."
+    },
+    {
+      "question": "What is hydration in React?",
+      "answer": "Hydration is the process of attaching event listeners and making server-rendered HTML interactive by connecting it to React components on the client side. It's essential for server-side rendered applications to become fully functional."
+    },
+    {
+      "question": "What are React's concurrent features?",
+      "answer": "Concurrent features include: automatic batching (grouping state updates), startTransition (marking non-urgent updates), useDeferredValue (deferring expensive updates), Suspense improvements, and time slicing for better user experience during heavy computations."
+    },
+    {
+      "question": "What is the difference between React.lazy and dynamic imports?",
+      "answer": "React.lazy is specifically designed for lazy loading React components and must be used with Suspense. Dynamic imports (import()) are a general JavaScript feature for code splitting that can be used for any module, not just React components."
+    },
+    {
+      "question": "What are React's error handling mechanisms?",
+      "answer": "Error handling mechanisms include: error boundaries for catching component errors, try-catch blocks for synchronous errors, Promise rejection handling for async errors, and proper error reporting/logging strategies for production applications."
+    },
+    {
+      "question": "What is the useDebugValue hook?",
+      "answer": "useDebugValue is used to display labels for custom hooks in React DevTools. It helps with debugging by showing additional information about custom hook values, making development and troubleshooting easier."
+    },
+    {
+      "question": "What are React's rendering phases?",
+      "answer": "React rendering includes: render phase (computing changes, can be interrupted), commit phase (applying changes to DOM, synchronous), and cleanup phase (running cleanup functions). Understanding these phases helps optimize performance and avoid side effects."
+    },
+    {
+      "question": "What is the difference between React elements and React nodes?",
+      "answer": "React elements are objects describing what should be rendered (created by JSX or createElement). React nodes are a broader concept including elements, strings, numbers, arrays, fragments, or null - anything that can be rendered by React."
+    },
+    {
+      "question": "What are React's update batching mechanisms?",
+      "answer": "React batches updates for performance. In React 18, automatic batching groups multiple state updates in timeouts, promises, and native event handlers. Previously, only React event handlers were batched. This reduces unnecessary re-renders."
+    },
+    {
+      "question": "What is the React.StrictMode's double invocation behavior?",
+      "answer": "StrictMode intentionally double-invokes functions like constructors, render methods, state updaters, and effects in development to help detect side effects and unsafe patterns. This helps ensure components work correctly with concurrent features."
+    },
+    {
+      "question": "What are React's ref forwarding patterns?",
+      "answer": "Ref forwarding patterns include: forwardRef for passing refs through components, useImperativeHandle for exposing specific methods, callback refs for dynamic ref handling, and ref objects created with useRef for persistent references."
+    },
+    {
+      "question": "What is the difference between React's development and production error boundaries?",
+      "answer": "Development error boundaries show detailed error information and stack traces for debugging. Production error boundaries should show user-friendly error messages while logging detailed errors to monitoring services for developer analysis."
+    },
+    {
+      "question": "What are React's memory management best practices?",
+      "answer": "Best practices include: cleaning up subscriptions in useEffect, avoiding memory leaks with proper cleanup, using weak references when appropriate, implementing virtualization for large lists, and being mindful of closure captures in hooks."
+    },
+    {
+      "question": "What is the React Profiler component and API?",
+      "answer": "React Profiler is a component that measures performance of its children, calling a callback with timing information. The Profiler API allows programmatic performance measurement, helping identify performance bottlenecks in applications."
+    },
+    {
+      "question": "What are React's server-side rendering considerations?",
+      "answer": "SSR considerations include: hydration mismatches, server/client environment differences, SEO optimization, initial page load performance, streaming rendering, and proper handling of client-only code that shouldn't run on the server."
+    },
+    {
+      "question": "What is the difference between React's legacy and concurrent mode?",
+      "answer": "Legacy mode renders synchronously and blocks the main thread. Concurrent mode enables interruptible rendering, allowing React to pause work for higher priority updates, resulting in better user experience and responsiveness."
+    },
+    {
+      "question": "What are React's code splitting strategies?",
+      "answer": "Code splitting strategies include: route-based splitting (loading components per route), component-based splitting (lazy loading individual components), library splitting (separating vendor code), and dynamic imports based on user interactions or conditions."
+    },
+    {
+      "question": "What is the React DevTools Profiler's flame graph?",
+      "answer": "The flame graph visualizes component render times during profiling sessions. Width represents time spent rendering, height shows component hierarchy, and colors indicate performance. It helps identify slow components and optimization opportunities."
+    },
+    {
+      "question": "What are React's testing strategies and tools?",
+      "answer": "Testing strategies include: unit tests with Jest and React Testing Library, integration tests for component interactions, snapshot tests for UI regression, end-to-end tests with Cypress or Playwright, and visual regression testing for UI changes."
+    },
+    {
+      "question": "What is the difference between React's shallow and deep updates?",
+      "answer": "Shallow updates only modify top-level properties of state objects, requiring immutable updates for nested changes. Deep updates would modify nested properties directly but aren't recommended in React as they can cause issues with change detection and re-rendering."
+    },
+    {
+      "question": "What are React's progressive enhancement techniques?",
+      "answer": "Progressive enhancement techniques include: server-side rendering for basic functionality, client-side hydration for interactivity, graceful degradation for JavaScript-disabled environments, and using semantic HTML as the foundation for enhanced experiences."
+    },
+    {
+      "question": "What is React's scheduler and time slicing?",
+      "answer": "React's scheduler manages work priority and implements time slicing, breaking long-running tasks into smaller chunks. This allows the browser to handle other tasks (like user input) between chunks, maintaining responsiveness in complex applications."
+    },
+    {
+      "question": "What are React's bundle optimization techniques?",
+      "answer": "Bundle optimization includes: code splitting for smaller initial loads, tree shaking to remove unused code, module federation for sharing code between applications, dynamic imports for on-demand loading, and analyzing bundle composition with tools like webpack-bundle-analyzer."
+    },
+    {
+      "question": "What is the React.startTransition function?",
+      "answer": "startTransition marks state updates as non-urgent transitions, allowing React to interrupt them for more urgent updates like user input. This helps maintain responsive UI during expensive operations like filtering large lists or complex calculations."
+    },
+    {
+      "question": "What are React's component update optimization strategies?",
+      "answer": "Optimization strategies include: memoization with React.memo, useCallback, and useMemo, proper dependency arrays in hooks, avoiding object/array literals in JSX, lifting expensive calculations out of render, and implementing shouldComponentUpdate or PureComponent for class components."
+    },
+    {
+      "question": "What is the useDeferredValue hook in React 18?",
+      "answer": "useDeferredValue accepts a value and returns a deferred version that lags behind during urgent updates. It helps keep expensive updates from blocking urgent UI updates, improving perceived performance during heavy operations."
+    },
+    {
+      "question": "What are React's accessibility testing approaches?",
+      "answer": "Accessibility testing includes: automated testing with tools like axe-core, manual testing with screen readers, keyboard navigation testing, color contrast verification, focus management testing, and using semantic HTML elements properly."
+    },
+    {
+      "question": "What is React's concurrent rendering and its benefits?",
+      "answer": "Concurrent rendering allows React to prepare multiple versions of the UI simultaneously and switch between them. Benefits include better user experience during slow renders, ability to prioritize urgent updates, and improved performance on slower devices."
+    },
+    {
+      "question": "What are React's state management evolution patterns?",
+      "answer": "State management has evolved from: component state, to lifting state up, to Context API for global state, to external solutions like Redux, to modern approaches like Zustand, SWR/React Query for server state, and hooks for local state logic."
+    },
+    {
+      "question": "What is the useId hook in React 18?",
+      "answer": "useId generates unique IDs that are consistent between server and client rendering. It's useful for accessibility attributes like aria-describedby, htmlFor, and other cases where you need stable, unique identifiers that work with SSR."
+    },
+    {
+      "question": "What are React's modern development workflow practices?",
+      "answer": "Modern practices include: TypeScript for type safety, ESLint and Prettier for code quality, hot module replacement for fast development, automated testing, continuous integration, component documentation with Storybook, and performance monitoring."
+    },
+    {
+      "question": "What is React's future roadmap and upcoming features?",
+      "answer": "Future directions include: Server Components for better performance, enhanced concurrent features, improved Suspense capabilities, better TypeScript integration, continued performance optimizations, and evolution of the React ecosystem with meta-frameworks."
+    },
+    {
+      "question": "What are React's micro-frontend integration strategies?",
+      "answer": "Micro-frontend strategies include: module federation for sharing React applications, single-spa for framework-agnostic integration, iframe-based isolation, web components for encapsulation, and shared component libraries for consistency across teams."
+    },
+    {
+      "question": "What is React's approach to backwards compatibility?",
+      "answer": "React maintains backwards compatibility through: gradual adoption paths for new features, codemods for automated migrations, deprecation warnings before removing features, maintaining legacy APIs alongside new ones, and providing clear upgrade guides for major versions."
+    },
+    {
+      "question": "What are React's cross-platform development possibilities?",
+      "answer": "Cross-platform options include: React Native for mobile apps, Electron for desktop applications, React Native for Web for code sharing, React VR for virtual reality, and server-side rendering for enhanced web performance and SEO."
+    }
+  ]
+}
