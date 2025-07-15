@@ -24,6 +24,7 @@ from .auth.routes import router as auth_router  # noqa: E402
 from .auth.utils import get_current_user  # noqa: E402
 from .config import get_session  # noqa: E402
 from .vector_search.routes import router as vector_router  # noqa: E402
+from .interview.routes import router as interview_router  # noqa: E402
 
 app = FastAPI(
     title="AptWise Backend API",
@@ -75,6 +76,9 @@ app.include_router(auth_router)
 
 # Include vector search routes
 app.include_router(vector_router)
+
+# Include interview routes
+app.include_router(interview_router)
 
 
 @app.get("/")
