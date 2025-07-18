@@ -2,6 +2,7 @@
 FastAPI routes for interview presets.
 """
 from typing import Optional
+import logging
 from fastapi import APIRouter, HTTPException, Depends, status
 from ..auth.utils import get_current_user
 from ..database.database_preset_functions import (
@@ -16,10 +17,15 @@ from .models import (
     InterviewPresetUpdate,
     InterviewPresetResponse,
     InterviewPresetListResponse,
-    InterviewPresetDeleteResponse
+    InterviewPresetDeleteResponse,
+    InterviewQuestionRequest,
+    InterviewQuestionResponse,
+    InterviewPresetGenerationRequest,
+    InterviewPresetGenerationResponse
 )
 
 router = APIRouter(prefix="/interview", tags=["interview"])
+logger = logging.getLogger(__name__)
 
 
 @router.get("/presets", response_model=InterviewPresetListResponse)
@@ -199,4 +205,126 @@ async def delete_preset(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to delete preset: {str(e)}"
+        )
+
+
+# AI Interview Route
+@router.post("/generate-question", response_model=InterviewQuestionResponse)
+async def generate_interview_question(
+    request: InterviewQuestionRequest,
+    current_user: Optional[str] = Depends(get_current_user)
+):
+    """Generate an interview question using AI."""
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+
+    try:
+        # Initialize AI service - import here to avoid circular imports
+        from .ai_service import AIInterviewService
+
+        # Initialize AI service
+        ai_service = AIInterviewService()
+
+        # Convert conversation history to the format expected by AI service
+        conversation_messages = []
+        for msg in request.conversation_history:
+            conversation_messages.append({
+                'role': msg.role,
+                'content': msg.content
+            })
+
+        # Format conversation history
+        conversation_history = ai_service.\
+            format_conversation_history(conversation_messages)
+
+        # Generate question
+        result = ai_service.generate_interview_question(
+            user_details=request.user_details,
+            skills=request.skills,
+            conversation_history=conversation_history,
+            search_context=request.search_context
+        )
+
+        return InterviewQuestionResponse(
+            question=result['question'],
+            success=result['success'],
+            message="Question generated successfully"
+            if result['success'] else "Failed to generate question",
+            search_context=result.get('search_context'),
+            evaluation=result.get('evaluation')
+        )
+
+    except ImportError as e:
+        logger.error(f"Failed to import AI service: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="AI service not available. \
+            Please check Google Generative AI installation."
+        )
+    except ValueError as e:
+        logger.error(f"Configuration error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="AI service configuration error. \
+            Please check environment variables."
+        )
+    except Exception as e:
+        logger.error(f"Error generating interview question: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate question: {str(e)}"
+        )
+
+
+# AI Preset Generation Route
+@router.post("/generate-preset",
+             response_model=InterviewPresetGenerationResponse)
+async def generate_interview_preset(
+    request: InterviewPresetGenerationRequest,
+    current_user: Optional[str] = Depends(get_current_user)
+):
+    """Generate an interview preset using AI."""
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+
+    try:
+        # Initialize AI preset service - import here to avoid circular imports
+        from .preset_ai_service import AIPresetService
+
+        # Initialize AI preset service
+        ai_preset_service = AIPresetService()
+
+        # Generate preset
+        result = ai_preset_service.generate_interview_preset(
+            description=request.description,
+            user_skills=request.user_skills
+        )
+
+        return InterviewPresetGenerationResponse(**result)
+
+    except ImportError as e:
+        logger.error(f"Failed to import AI preset service: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="AI preset service not available. \
+            Please check Google Generative AI installation."
+        )
+    except ValueError as e:
+        logger.error(f"Configuration error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="AI preset service configuration error. \
+            Please check environment variables."
+        )
+    except Exception as e:
+        logger.error(f"Error generating interview preset: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate preset: {str(e)}"
         )
