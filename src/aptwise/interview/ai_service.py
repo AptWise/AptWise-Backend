@@ -287,8 +287,10 @@ class AIInterviewService:
 
         **NEVER ask questions about skills not in this list. \
         ALL questions must be directly related to one or more \
-        of these specific skills.**
-
+        of these specific skills. Also keep it fast moving. Do \
+        not linger on any one question for too long. Keep \
+        changing the topic frequently. Do not keep asking \
+        from the same topic again and again.**
         ---
 
         ## Core Task

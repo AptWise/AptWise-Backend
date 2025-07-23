@@ -620,3 +620,149 @@ def add_user_skill(email: str, skill: str, proficiency: str = "3") -> bool:
 def remove_user_skill(email: str, skill: str) -> bool:
     """Remove a specific skill for a user."""
     return delete_user_skill(email, skill)  # Reuse existing function
+
+
+def create_user_interview(email: str,
+                          title: str,
+                          interview_text: str
+                          ) -> Optional[Dict[str, Any]]:
+    """Create a new user interview record."""
+    session = get_session()
+    if not session:
+        raise RuntimeError("Database connection not available")
+
+    try:
+        query = text("""
+        INSERT INTO user_interviews (email, title, interview_text)
+        VALUES (:email, :title, :interview_text)
+        RETURNING id, email, title, interview_text, created_at
+        """)
+
+        result = session.execute(query, {
+            "email": email,
+            "title": title,
+            "interview_text": interview_text
+        })
+
+        interview = result.fetchone()
+        session.commit()
+        session.close()
+
+        if interview:
+            return {
+                "id": interview.id,
+                "email": interview.email,
+                "title": interview.title,
+                "interview_text": interview.interview_text,
+                "created_at": interview.created_at.isoformat()
+            }
+        return None
+
+    except Exception as e:
+        session.rollback()
+        session.close()
+        print(f"Error creating user interview: {e}")
+        return None
+
+
+def get_user_interviews(email: str) -> List[Dict[str, Any]]:
+    """Get all interviews for a user by email."""
+    session = get_session()
+    if not session:
+        raise RuntimeError("Database connection not available")
+
+    try:
+        query = text("""
+        SELECT id, email, title, interview_text, created_at
+        FROM user_interviews
+        WHERE email = :email
+        ORDER BY created_at DESC
+        """)
+
+        result = session.execute(query, {"email": email})
+        interviews = result.fetchall()
+        session.close()
+
+        return [
+            {
+                "id": interview.id,
+                "email": interview.email,
+                "title": interview.title,
+                "interview_text": interview.interview_text,
+                "created_at": interview.created_at.isoformat()
+            }
+            for interview in interviews
+        ]
+
+    except Exception as e:
+        session.close()
+        print(f"Error fetching user interviews: {e}")
+        return []
+
+
+def get_user_interview_by_id(interview_id: int,
+                             email: str
+                             ) -> Optional[Dict[str, Any]]:
+    """Get a specific interview by ID and email (for security)."""
+    session = get_session()
+    if not session:
+        raise RuntimeError("Database connection not available")
+
+    try:
+        query = text("""
+        SELECT id, email, title, interview_text, created_at
+        FROM user_interviews
+        WHERE id = :interview_id AND email = :email
+        """)
+
+        result = session.execute(query, {
+            "interview_id": interview_id,
+            "email": email
+        })
+
+        interview = result.fetchone()
+        session.close()
+
+        if interview:
+            return {
+                "id": interview.id,
+                "email": interview.email,
+                "title": interview.title,
+                "interview_text": interview.interview_text,
+                "created_at": interview.created_at.isoformat()
+            }
+        return None
+
+    except Exception as e:
+        session.close()
+        print(f"Error fetching user interview: {e}")
+        return None
+
+
+def delete_user_interview(interview_id: int, email: str) -> bool:
+    """Delete a specific interview by ID and email (for security)."""
+    session = get_session()
+    if not session:
+        raise RuntimeError("Database connection not available")
+
+    try:
+        query = text("""
+        DELETE FROM user_interviews
+        WHERE id = :interview_id AND email = :email
+        """)
+
+        result = session.execute(query, {
+            "interview_id": interview_id,
+            "email": email
+        })
+
+        session.commit()
+        session.close()
+
+        return result.rowcount > 0
+
+    except Exception as e:
+        session.rollback()
+        session.close()
+        print(f"Error deleting user interview: {e}")
+        return False
