@@ -22,7 +22,7 @@ class AIPresetService:
 
         # Configure Gemini API
         genai.configure(api_key=self.gemini_api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.model = genai.GenerativeModel('gemini-2.5-flash-lite')
 
         logger.info("AI Preset service initialized")
 
