@@ -7,7 +7,8 @@ from fastapi.responses import RedirectResponse
 from .models import (UserCreate, UserLogin, UserResponse,
                      LinkedInAuthRequest, GitHubAuthRequest,
                      UserProfileUpdate, PasswordUpdate,
-                     SkillAdd, SkillRemove)
+                     SkillAdd, SkillRemove, UserInterviewCreate,
+                     UserInterviewResponse)
 from .utils import (create_access_token, set_access_cookies,
                     unset_jwt_cookies, get_current_user,
                     hash_password, verify_password)
@@ -19,7 +20,9 @@ from ..database import (get_user_by_email, create_user, delete_user,
                         update_user_github_connection,
                         disconnect_user_github, create_user_skills,
                         delete_all_user_skills, get_user_skills,
-                        update_user_profile, add_user_skill, remove_user_skill)
+                        update_user_profile, add_user_skill, remove_user_skill,
+                        create_user_interview, get_user_interviews,
+                        get_user_interview_by_id, delete_user_interview)
 from .linkedin_service import linkedin_oauth_service
 from .github_service import github_oauth_service
 
@@ -1165,4 +1168,96 @@ async def remove_skill(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to remove skill: {str(e)}"
+        )
+
+
+@router.post("/interviews", response_model=UserInterviewResponse)
+async def save_interview(
+    interview_data: UserInterviewCreate,
+    current_user: str = Depends(get_current_user)
+):
+    """Save a user interview."""
+    try:
+        interview = create_user_interview(
+            email=current_user,
+            title=interview_data.title,
+            interview_text=interview_data.interview_text
+        )
+
+        if not interview:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to save interview"
+            )
+
+        return UserInterviewResponse(**interview)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to save interview: {str(e)}"
+        )
+
+
+@router.get("/interviews", response_model=list[UserInterviewResponse])
+async def get_interviews(current_user: str = Depends(get_current_user)):
+    """Get all interviews for the current user."""
+    try:
+        interviews = get_user_interviews(current_user)
+        return [UserInterviewResponse(**interview) for interview in interviews]
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch interviews: {str(e)}"
+        )
+
+
+@router.get("/interviews/{interview_id}", response_model=UserInterviewResponse)
+async def get_interview(
+    interview_id: int,
+    current_user: str = Depends(get_current_user)
+):
+    """Get a specific interview by ID."""
+    try:
+        interview = get_user_interview_by_id(interview_id, current_user)
+
+        if not interview:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Interview not found"
+            )
+
+        return UserInterviewResponse(**interview)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch interview: {str(e)}"
+        )
+
+
+@router.delete("/interviews/{interview_id}")
+async def delete_interview(
+    interview_id: int,
+    current_user: str = Depends(get_current_user)
+):
+    """Delete a specific interview by ID."""
+    try:
+        success = delete_user_interview(interview_id, current_user)
+
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Interview not found or could not be deleted"
+            )
+
+        return {"message": "Interview deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete interview: {str(e)}"
         )

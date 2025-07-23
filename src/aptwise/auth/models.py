@@ -128,3 +128,19 @@ class SkillAdd(BaseModel):
 
 class SkillRemove(BaseModel):
     skill: str
+
+
+class UserInterviewCreate(BaseModel):
+    title: str
+    interview_text: str
+
+
+class UserInterviewResponse(BaseModel):
+    id: int
+    title: str
+    email: str
+    interview_text: str
+    created_at: str
+
+    class Config:
+        from_attributes = True
