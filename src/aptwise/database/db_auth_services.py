@@ -766,3 +766,123 @@ def delete_user_interview(interview_id: int, email: str) -> bool:
         session.close()
         print(f"Error deleting user interview: {e}")
         return False
+
+
+def create_user_evaluation(email: str,
+                           interview_id: int,
+                           evaluation_text: str
+                           ) -> Optional[Dict[str, Any]]:
+    """Create a new user evaluation record."""
+    session = get_session()
+    if not session:
+        raise RuntimeError("Database connection not available")
+
+    try:
+        query = text("""
+        INSERT INTO user_evaluation (email, interview_id, evaluation_text)
+        VALUES (:email, :interview_id, :evaluation_text)
+        RETURNING id, email, interview_id, evaluation_text, created_at
+        """)
+
+        result = session.execute(query, {
+            "email": email,
+            "interview_id": interview_id,
+            "evaluation_text": evaluation_text
+        })
+
+        evaluation = result.fetchone()
+        session.commit()
+        session.close()
+
+        if evaluation:
+            return {
+                "id": evaluation.id,
+                "email": evaluation.email,
+                "interview_id": evaluation.interview_id,
+                "evaluation_text": evaluation.evaluation_text,
+                "created_at": evaluation.created_at.isoformat()
+            }
+        return None
+
+    except Exception as e:
+        session.rollback()
+        session.close()
+        print(f"Error creating user evaluation: {e}")
+        return None
+
+
+def get_user_evaluation_by_interview_id(interview_id: int,
+                                        email: str
+                                        ) -> Optional[Dict[str, Any]]:
+    """Get evaluation for a specific interview by ID and email."""
+    session = get_session()
+    if not session:
+        raise RuntimeError("Database connection not available")
+
+    try:
+        query = text("""
+        SELECT id, email, interview_id, evaluation_text, created_at
+        FROM user_evaluation
+        WHERE interview_id = :interview_id AND email = :email
+        """)
+
+        result = session.execute(query, {
+            "interview_id": interview_id,
+            "email": email
+        })
+
+        evaluation = result.fetchone()
+        session.close()
+
+        if evaluation:
+            return {
+                "id": evaluation.id,
+                "email": evaluation.email,
+                "interview_id": evaluation.interview_id,
+                "evaluation_text": evaluation.evaluation_text,
+                "created_at": evaluation.created_at.isoformat()
+            }
+        return None
+
+    except Exception as e:
+        session.close()
+        print(f"Error fetching user evaluation: {e}")
+        return None
+
+
+def get_user_evaluations(email: str) -> List[Dict[str, Any]]:
+    """Get all evaluations for a user by email."""
+    session = get_session()
+    if not session:
+        raise RuntimeError("Database connection not available")
+
+    try:
+        query = text("""
+        SELECT ue.id, ue.email, ue.interview_id, ue.evaluation_text,
+               ue.created_at, ui.title as interview_title
+        FROM user_evaluation ue
+        JOIN user_interviews ui ON ue.interview_id = ui.id
+        WHERE ue.email = :email
+        ORDER BY ue.created_at DESC
+        """)
+
+        result = session.execute(query, {"email": email})
+        evaluations = result.fetchall()
+        session.close()
+
+        return [
+            {
+                "id": evaluation.id,
+                "email": evaluation.email,
+                "interview_id": evaluation.interview_id,
+                "evaluation_text": evaluation.evaluation_text,
+                "created_at": evaluation.created_at.isoformat(),
+                "interview_title": evaluation.interview_title
+            }
+            for evaluation in evaluations
+        ]
+
+    except Exception as e:
+        session.close()
+        print(f"Error fetching user evaluations: {e}")
+        return []
