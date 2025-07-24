@@ -485,6 +485,9 @@ Return ONLY the JSON response, no additional text.
             # Parse JSON
             evaluation = json.loads(cleaned_text)
 
+            # Sanitize overall evaluation data
+            evaluation = self._sanitize_evaluation_data(evaluation)
+
             # Validate required fields (enhanced structure)
             required_fields = [
                 'overall_score', 'performance_summary', 'strengths',
@@ -497,18 +500,19 @@ Return ONLY the JSON response, no additional text.
                 if field not in evaluation:
                     logger.warning(f"Missing required field: {field}")
 
-            # Validate individual answer assessments if present
+            # Validate and sanitize individual answer assessments if present
             if 'individual_answer_assessments' in evaluation:
                 assessments = evaluation['individual_answer_assessments']
+                sanitized_assessments = []
+
                 for i, assessment in enumerate(assessments):
-                    required_assessment_fields = [
-                        'question_number', 'accurateness', 'confidence',
-                        'completeness', 'overall_answer_score'
-                    ]
-                    for field in required_assessment_fields:
-                        if field not in assessment:
-                            logger.warning(f"Missing field {field} in "
-                                           f"assessment {i}")
+                    sanitized_assessment = \
+                        self._sanitize_assessment(assessment, i)
+                    if sanitized_assessment:
+                        sanitized_assessments.append(sanitized_assessment)
+
+                evaluation['individual_answer_assessments'] =\
+                    sanitized_assessments
 
             return evaluation
 
@@ -519,6 +523,124 @@ Return ONLY the JSON response, no additional text.
         except Exception as e:
             logger.error(f"Error parsing evaluation response: {e}")
             return self._create_fallback_evaluation(response_text)
+
+    def _sanitize_evaluation_data(self, evaluation:
+                                  Dict[str, Any]) -> Dict[str, Any]:
+        """Sanitize evaluation data to
+            ensure all scores meet minimum requirements."""
+        try:
+            sanitized = evaluation.copy()
+
+            # Ensure overall_score is valid (>= 1)
+            if 'overall_score' not in sanitized or \
+                    sanitized['overall_score'] is None or \
+                    sanitized['overall_score'] < 1:
+                sanitized['overall_score'] = 50
+
+            # Sanitize competency scores
+            competency_fields = \
+                ['technical_competency', 'communication_skills',
+                 'problem_solving', 'cultural_fit']
+            for field in competency_fields:
+                if field not in sanitized or \
+                        not isinstance(sanitized[field], dict):
+                    sanitized[field] = \
+                        {'score': 50, 'feedback':
+                            f"Unable to assess {field.replace('_', ' ')}"}
+                else:
+                    # Ensure score is valid (>= 1)
+                    if 'score' not in sanitized[field] or \
+                            sanitized[field]['score'] is None or \
+                            sanitized[field]['score'] < 1:
+                        sanitized[field]['score'] = 50
+                    # Ensure feedback is valid string
+                    if 'feedback' not in sanitized[field] or \
+                            sanitized[field]['feedback'] is None:
+                        sanitized[field]['feedback'] = \
+                            f"Assessment for {field.replace('_', ' ')} \
+                                unavailable"
+
+            # Ensure reference_coverage_score is valid if present
+            if 'reference_coverage_score' in sanitized:
+                if sanitized['reference_coverage_score'] is None or \
+                        sanitized['reference_coverage_score'] < 1:
+                    sanitized['reference_coverage_score'] = 50
+
+            return sanitized
+
+        except Exception as e:
+            logger.error(f"Error sanitizing evaluation data: {e}")
+            return evaluation
+
+    def _sanitize_assessment(self, assessment: Dict[str, Any],
+                             index: int) -> Dict[str, Any]:
+        """Sanitize individual answer assessment to ensure valid values."""
+        try:
+            sanitized = assessment.copy()
+
+            # Ensure question_number is valid
+            if 'question_number' not in sanitized or not \
+                    isinstance(sanitized['question_number'], int):
+                sanitized['question_number'] = index + 1
+
+            # Ensure question is a valid string
+            if 'question' not in sanitized or sanitized['question'] is None:
+                sanitized['question'] = f"Interview question {index + 1}"
+
+            # Ensure user_answer is a valid string
+            if 'user_answer' not in sanitized or \
+                    sanitized['user_answer'] is None:
+                sanitized['user_answer'] = "No answer provided"
+
+            # Ensure reference_answer is a valid string
+            if 'reference_answer' not in sanitized or \
+                    sanitized['reference_answer'] is None:
+                sanitized['reference_answer'] = \
+                    "No reference answer available"
+
+            # Sanitize assessment dimensions
+            for dimension in ['accurateness', 'confidence', 'completeness']:
+                if dimension not in sanitized or not \
+                        isinstance(sanitized[dimension], dict):
+                    sanitized[dimension] = \
+                        {'score': 50, 'feedback':
+                            f"Unable to assess {dimension}"}
+                else:
+                    # Ensure score is valid (>= 1)
+                    if 'score' not in sanitized[dimension] or \
+                        sanitized[dimension]['score'] is None or \
+                            sanitized[dimension]['score'] < 1:
+                        sanitized[dimension]['score'] = 50
+                    # Ensure feedback is valid string
+                    if 'feedback' not in sanitized[dimension] or \
+                            sanitized[dimension]['feedback'] is None:
+                        sanitized[dimension]['feedback'] = \
+                            f"Assessment for {dimension} unavailable"
+
+            # Ensure overall_answer_score is valid (>= 1)
+            if 'overall_answer_score' not in sanitized or \
+                sanitized['overall_answer_score'] is None or \
+                    sanitized['overall_answer_score'] < 1:
+                sanitized['overall_answer_score'] = 50
+
+            return sanitized
+
+        except Exception as e:
+            logger.error(f"Error sanitizing assessment {index}: {e}")
+            # Return a fallback assessment
+            return {
+                'question_number': index + 1,
+                'question': f"Interview question {index + 1}",
+                'user_answer': "Unable to parse answer",
+                'reference_answer': "No reference available",
+                'accurateness': {'score': 50, 'feedback':
+                                 'Unable to assess accuracy'},
+                'confidence': {'score': 50, 'feedback':
+                               'Unable to assess confidence'},
+                'completeness': {'score': 50, 'feedback':
+                                 'Unable to assess completeness'},
+                'overall_answer_score': 50
+            }
 
     def _create_fallback_evaluation(self,
                                     response_text: str
