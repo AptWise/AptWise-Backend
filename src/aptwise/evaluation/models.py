@@ -52,6 +52,31 @@ class CulturalFit(BaseModel):
     feedback: str = Field(..., description="Cultural fit assessment")
 
 
+class AssessmentDimension(BaseModel):
+    """Model for individual assessment dimensions
+        (Accurateness, Confidence, Completeness)."""
+    score: int = Field(..., ge=1, le=100, description="Dimension score")
+    feedback: str = Field(..., description="Dimension-specific feedback")
+
+
+class IndividualAnswerAssessment(BaseModel):
+    """Model for individual answer assessment with reference comparison."""
+    question_number: int = \
+        Field(..., description="Question number in the interview")
+    question: str = Field(..., description="The interview question")
+    user_answer: str = Field(..., description="Candidate's answer")
+    reference_answer: str = \
+        Field(..., description="Reference answer from knowledge base")
+    accurateness: AssessmentDimension = \
+        Field(..., description="Accurateness assessment")
+    confidence: AssessmentDimension = \
+        Field(..., description="Confidence assessment")
+    completeness: AssessmentDimension = \
+        Field(..., description="Completeness assessment")
+    overall_answer_score: int = \
+        Field(..., ge=1, le=100, description="Overall score for this answer")
+
+
 class DetailedFeedback(BaseModel):
     """Model for detailed feedback."""
     positive_highlights: List[str] = \
@@ -72,6 +97,11 @@ class EvaluationResult(BaseModel):
     performance_summary: str = \
         Field(...,
               description="Overall performance summary")
+    individual_answer_assessments: \
+        Optional[List[IndividualAnswerAssessment]] = Field(
+            None, description="Individual answer assessments \
+                               with reference comparison"
+        )
     strengths: List[str] = Field(..., description="Candidate strengths")
     areas_for_improvement: List[str] = \
         Field(...,
@@ -85,6 +115,10 @@ class EvaluationResult(BaseModel):
                                   description="Recommended next steps")
     interview_grade: str = Field(...,
                                  description="Letter grade for the interview")
+    reference_coverage_score: Optional[int] = Field(
+        None, ge=1, le=100, description="How well answers covered \
+                                        reference knowledge"
+        )
 
 
 class EvaluationResponse(BaseModel):
