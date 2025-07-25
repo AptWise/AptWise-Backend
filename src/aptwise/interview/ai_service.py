@@ -371,7 +371,8 @@ class AIInterviewService:
             "Response": "Your full response to the user, \
                 including feedback on their last answer and \
                 the new question about one of the allowed \
-                skills: {', '.join(skills)}.",
+                skills: {', '.join(skills)}. Ensure that \
+                the response is in a single paragraph.",
             "SearchContext": "One of these allowed skills \
                 that you plan to ask \
                 about in your NEXT turn: {', '.join(skills)}",
