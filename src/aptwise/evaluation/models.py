@@ -87,38 +87,91 @@ class DetailedFeedback(BaseModel):
               description="Actionable improvement suggestions")
 
 
+class SkillAssessment(BaseModel):
+    """Model for individual skill assessment."""
+    score: int = Field(..., ge=1, le=100, description="Skill score")
+    feedback: str = Field(..., description="Skill-specific feedback")
+
+
+class EvaluationMetric(BaseModel):
+    """Model for evaluation metrics (Correctness, Completeness, Confidence)."""
+    score: int = Field(..., ge=1, le=100, description="Metric score")
+    feedback: str = Field(..., description="Metric-specific feedback")
+
+
+class QuestionEvaluation(BaseModel):
+    """Model for question evaluation metrics."""
+    correctness: EvaluationMetric = \
+        Field(..., description="Correctness assessment")
+    completeness: EvaluationMetric = \
+        Field(..., description="Completeness assessment")
+    confidence: EvaluationMetric = \
+        Field(..., description="Confidence assessment")
+
+
+class DetailedBreakdown(BaseModel):
+    """Model for detailed question breakdown."""
+    question_number: int = \
+        Field(..., description="Question \
+        number in the interview")
+    question: str = Field(..., description="The interview question")
+    user_answer: str = Field(..., description="Candidate's answer")
+    evaluation: QuestionEvaluation = \
+        Field(..., description="Question evaluation metrics")
+
+
 class EvaluationResult(BaseModel):
-    """Model for evaluation results."""
-    overall_score: int = \
-        Field(...,
-              ge=1,
-              le=100,
+    """Model for evaluation results with \
+       support for both new and legacy formats."""
+
+    # New format fields (primary)
+    final_score: Optional[int] = \
+        Field(None, ge=1, le=100,
+              description="Final interview score")
+    overall_feedback: Optional[str] = \
+        Field(None, description="Overall \
+        performance feedback")
+    skill_performance_summary: Optional[Dict[str, SkillAssessment]] = Field(
+        None, description="Individual skill assessments"
+    )
+    detailed_breakdown: Optional[List[DetailedBreakdown]] = Field(
+        None, description="Question-by-question analysis"
+    )
+
+    # Legacy format fields (for backward compatibility)
+    overall_score: Optional[int] = \
+        Field(None, ge=1, le=100,
               description="Overall interview score")
-    performance_summary: str = \
-        Field(...,
-              description="Overall performance summary")
+    performance_summary: Optional[str] = \
+        Field(None, description="Overall \
+            performance summary")
     individual_answer_assessments: \
         Optional[List[IndividualAnswerAssessment]] = Field(
-            None, description="Individual answer assessments \
-                               with reference comparison"
+            None, description="Individual answer \
+            assessments with reference comparison"
         )
-    strengths: List[str] = Field(..., description="Candidate strengths")
-    areas_for_improvement: List[str] = \
-        Field(...,
-              description="Areas for improvement")
-    technical_competency: TechnicalCompetency
-    communication_skills: CommunicationSkills
-    problem_solving: ProblemSolving
-    cultural_fit: CulturalFit
-    detailed_feedback: DetailedFeedback
-    next_steps: List[str] = Field(...,
-                                  description="Recommended next steps")
-    interview_grade: str = Field(...,
-                                 description="Letter grade for the interview")
+    technical_competency: Optional[TechnicalCompetency] = None
+    communication_skills: Optional[CommunicationSkills] = None
+    problem_solving: Optional[ProblemSolving] = None
+    cultural_fit: Optional[CulturalFit] = None
+    detailed_feedback: Optional[DetailedFeedback] = None
+
+    # Common fields
+    strengths: List[str] = Field(default_factory=list,
+                                 description="Candidate strengths")
+    areas_for_improvement: List[str] = Field(
+        default_factory=list, description="Areas for improvement"
+    )
+    next_steps: Optional[List[str]] = Field(None,
+                                            description="Recommended \
+                                                next steps")
+    interview_grade: Optional[str] = Field(None,
+                                           description="Letter grade \
+                                               for the interview")
     reference_coverage_score: Optional[int] = Field(
         None, ge=1, le=100, description="How well answers covered \
-                                        reference knowledge"
-        )
+            reference knowledge"
+    )
 
 
 class EvaluationResponse(BaseModel):

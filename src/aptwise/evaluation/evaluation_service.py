@@ -208,149 +208,159 @@ Similarity Score: {similarity:.2f}
                               "vector database.**\n")
 
         prompt = f"""
-You are an expert technical interviewer and \
-career coach. Please evaluate the following \
-interview performance comprehensively using the \
-reference answers from our knowledge base.
+        ## Core Objective & Persona
+        You are a discerning and insightful career coach. \
+            Your goal is to provide a comprehensive, fair, and \
+            actionable evaluation of an interview performance. \
+            You will analyze the entire conversation, compare the \
+            candidate's responses to the provided reference answers, \
+            and produce a structured JSON report.
 
-**INTERVIEW CONTEXT:**
-- Company: {company}
-- Position: {role}
-- Candidate: {user_name}
-- Skills Assessed: {skills_text}
+        ---
 
-**CONVERSATION TRANSCRIPT:**
-{conversation_text}
+        ## Core Task
+        Your task is to generate a single JSON object that \
+        evaluates the user's entire interview performance.
+        1.  **Analyze the Full Transcript:** \
+            Review the entire `{conversation_text}`.
+        2.  **Compare to Ground Truth:** \
+            For each user answer, critically compare it to the \
+            corresponding `{reference_text}`.
+        3.  **Evaluate on Key Metrics:** \
+            Assess each answer based on Correctness, Completeness, \
+            and Confidence.
+        4.  **Aggregate by Skill:** \
+            Synthesize the performance for each skill assessed \
+            during the interview.
+        5.  **Generate the Final Report:** \
+            Output the complete evaluation in the specified JSON format.
 
-{reference_text}
+        ---
 
-**EVALUATION INSTRUCTIONS:**
-Please provide a detailed evaluation comparing the \
-candidate's answers to the reference answers. For each answer, assess based on:
+        ## CONTEXT FOR EVALUATION
+        -   **Company:** {company}
+        -   **Role:** {role}
+        -   **Candidate:** {user_name}
+        -   **Skills Assessed:** {skills_text}
+        -   **Full Conversation Transcript:** `{conversation_text}`
+        -   **Reference Answers (Ground Truth):** `{reference_text}`
 
-1. **Accurateness (40%)**: \
-    How closely the answer matches the expected/reference \
-    answer in terms of technical correctness and completeness
-2. **Confidence (30%)**: \
-    How assertive, structured, and clear \
-    the delivery is - assess communication style and conviction
-3. **Completeness (30%)**: \
-    Whether the candidate covers all \
-    essential points mentioned in the reference answer
+        ---
 
-Please provide your evaluation in the following JSON format:
+        ## KEY EVALUATION DIRECTIVES
 
-{{
-    "overall_score": <number between 1-100>,
-    "performance_summary": \
-        "<2-3 sentence overall assessment \
-        comparing to reference answers>",
-    "individual_answer_assessments": [
+        ### 1. Primary Evaluation Metrics
+        Base all your feedback on these three pillars. \
+        The reference answer is the benchmark for "Excellent" (100).
+        -   **Correctness:** \
+            How technically accurate was the answer \
+            compared to the reference? Was the information factually right?
+        -   **Completeness:** \
+            Did the answer cover all the key points and nuances \
+            mentioned in the reference answer? How deep was the knowledge?
+        -   **Confidence:** \
+            How was the answer delivered? Was it structured, \
+            clear, and assertive, or hesitant and disorganized?
+
+        ### 2. Skill-Level Performance Tracking (CRITICAL)
+        You MUST provide a summary for each \
+        individual skill listed in `{skills_text}`.
+        -   **Analyze & Aggregate:** \
+            For each skill (e.g., "Python"), look at all questions \
+            that touched upon that topic.
+        -   **Assign a Score:** \
+            Based on the user's performance across those specific \
+            questions, assign a score that reflects their overall \
+            proficiency in that skill.
+        -   **Provide Feedback:** \
+            Briefly explain why you gave that score. If their \
+            performance met expectations for the role, state that. \
+            If it was below expectations, note the key gaps.
+
+        ### 3. Reference Answer Generation (CRITICAL)
+        For each question in the detailed breakdown, \
+        you MUST provide a reference answer:
+        -   **Use Available References:** \
+            When reference answers are provided above, \
+            use them as the baseline for the optimal response.
+        -   **Generate Optimal Answers:** \
+            When no reference is available, generate the optimal \
+            answer that would demonstrate excellence for that \
+            specific question.
+        -   **Role-Specific:** \
+            Tailor the reference answer to be appropriate \
+            for the {role} position at {company}.
+        -   **Completeness:** \
+            Ensure the reference answer covers all key \
+            points that should be addressed for maximum \
+            correctness and completeness.
+
+        ---
+
+        ## OUTPUT FORMAT
+        **CRITICAL:** Generate your response **only** in the \
+        following JSON format. \
+        Do not add any text before or after the JSON object.
+
+        ```json
         {{
-            "question_number": <number>,
-            "question": "<the interview question>",
-            "user_answer": "<candidate's answer>",
-            "reference_answer": "<expected answer from knowledge base>",
-            "accurateness": {{
-                "score": <number between 1-100>,
-                "feedback": \
-                    "<specific assessment of technical accuracy vs reference>"
-            }},
-            "confidence": {{
-                "score": <number between 1-100>,
-                "feedback": "<assessment of delivery style and conviction>"
-            }},
-            "completeness": {{
-                "score": <number between 1-100>,
-                "feedback": "<assessment of coverage vs reference points>"
-            }},
-            "overall_answer_score": <number between 1-100>
-        }}
-    ],
-    "strengths": [
-        "<specific strength 1 with reference to expected answers>",
-        "<specific strength 2>",
-        "<specific strength 3>"
-    ],
-    "areas_for_improvement": [
-        "<specific area 1 with reference to gaps vs expected answers>",
-        "<specific area 2>",
-        "<specific area 3>"
-    ],
-    "technical_competency": {{
-        "score": <number between 1-100>,
-        "feedback": \
-            "<detailed technical assessment comparing to reference knowledge>"
-    }},
-    "communication_skills": {{
-        "score": <number between 1-100>,
-        "feedback": \
-            "<assessment of communication clarity, articulation, confidence>"
-    }},
-    "problem_solving": {{
-        "score": <number between 1-100>,
-        "feedback": \
-            "<assessment of analytical thinking \
-            and approach vs expected methodology>"
-    }},
-    "cultural_fit": {{
-        "score": <number between 1-100>,
-        "feedback": \
-            "<assessment of enthusiasm, collaboration, values alignment>"
-    }},
-    "detailed_feedback": {{
-        "positive_highlights": [
-            "<specific positive moment 1 comparing to reference standards>",
-            "<specific positive moment 2>"
+            "final_score": <number, weighted average from 1-100>,
+            "overall_feedback": "<A 2-3 sentence summary of \
+            the candidate's performance, \
+            highlighting their general fit for the \
+            role's technical requirements \
+            based on the interview.>",
+            "skill_performance_summary": {{
+                "<skill_1_name>": {{
+                    "score": <number from 1-100>,
+                    "feedback": \
+                    "<Brief assessment of proficiency in this skill. \
+                    State if it meets or is below expectations for the role. \
+                    e.g., 'Exceeded expectations. \
+                    Demonstrated deep understanding \
+                    of async patterns.' or 'Below expectations. \
+                    Struggled with fundamental concepts like joins.'>"
+                }},
+            "<skill_2_name>": {{
+                "score": <number from 1-100>,
+                "feedback": "<Feedback for the second skill...>"
+            }}
+        }},
+        "strengths": [
+            "<A specific, concise strength observed, \
+            tied to an example from the interview.>",
+            "<Another specific strength.>"
         ],
-        "improvement_suggestions": [
-            "<actionable suggestion 1 based on reference answer gaps>",
-            "<actionable suggestion 2>",
-            "<actionable suggestion 3>"
-        ]
-    }},
-    "next_steps": [
-        "<recommendation 1 based on knowledge gaps identified>",
-        "<recommendation 2>",
-        "<recommendation 3>"
-    ],
-    "interview_grade": "<letter grade: A+, A, A-, B+, B, B-, C+, C, C-, D, F>",
-    "reference_coverage_score": \
-        <number between 1-100, how well answers covered reference knowledge>
+        "areas_for_improvement": [
+            "<A specific, actionable area for improvement, \
+            referencing a gap compared to the reference answer.>",
+            "<Another specific area for improvement.>"
+        ],
+        "detailed_breakdown": [
+            {{
+                "question_number": 1,
+                "question": "<The first question asked>",
+                "user_answer": "<The user's answer to the first question>",
+                "reference_answer": \
+                    "<The optimal/expected answer \
+                    based on the reference knowledge base>",
+                "evaluation": {{
+                "correctness": \
+                    {{ "score": <number from 1-100>, \
+                        "feedback": "<Brief justification for \
+                        correctness score.>" }},
+                "completeness": \
+                    {{ "score": <number from 1-100>, \
+                        "feedback": "<Brief justification for \
+                        completeness score.>" }},
+                "confidence": \
+                {{ "score": <number from 1-100>, \
+                    "feedback": "<Brief justification \
+                    for confidence score.>" }}
+            }}
+        }}
+    ]
 }}
-
-**EVALUATION CRITERIA:**
-1. **Technical Competency (30%)**: \
-    Knowledge depth, accuracy vs reference answers, problem-solving approach
-2. **Communication Skills (25%)**: \
-    Clarity, articulation, confidence in delivery
-3. **Problem Solving (25%)**: \
-    Analytical thinking, approach to \
-    challenges, methodology vs expected approach
-4. **Cultural Fit (20%)**: \
-    Enthusiasm, collaboration, growth mindset, values alignment
-
-**SPECIFIC ASSESSMENT GUIDELINES:**
-- **Accurateness**: \
-    Compare technical content directly to reference answers. \
-    High scores for matching key concepts, low scores for factual errors
-- **Confidence**: Assess speech patterns, hesitation, structure. \
-    Look for assertive language, clear explanations, logical flow
-- **Completeness**: \
-    Check if all major points from reference answer were covered. \
-    Partial coverage gets medium scores
-
-**GUIDELINES:**
-- Be specific with examples from both the candidate's \
-    responses and reference answers
-- Highlight where the candidate exceeded or fell short of reference standards
-- Provide actionable feedback based on knowledge gaps identified
-- Consider the role and company context
-- Be encouraging while being honest about \
-    areas needing improvement relative to expected knowledge
-- Focus on both technical accuracy and delivery confidence
-
-Return ONLY the JSON response, no additional text.
 """
         return prompt
 
@@ -378,91 +388,156 @@ Return ONLY the JSON response, no additional text.
                        if skills else "General interview skills")
 
         prompt = f"""
-You are an expert technical interviewer and career coach. \
-    Please evaluate the following interview performance comprehensively.
+        ## Core Objective & Persona
+        You are a discerning and insightful career coach. \
+        Your goal is to provide a comprehensive, fair, and \
+        actionable evaluation of an interview performance. \
+        You will analyze the entire conversation, compare the \
+        candidate's responses to the provided reference answers, \
+        and produce a structured JSON report.
 
-**INTERVIEW CONTEXT:**
-- Company: {company}
-- Position: {role}
-- Candidate: {user_name}
-- Skills Assessed: {skills_text}
+        ---
 
-**CONVERSATION TRANSCRIPT:**
-{conversation_text}
+        ## Core Task
+        Your task is to generate a single JSON \
+        object that evaluates the user's entire \
+        interview performance.
+        1.  **Analyze the Full Transcript:** \
+            Review the entire `{conversation_text}`.
+        2.  **Compare to Ground Truth:** \
+            For each user answer, critically compare it to \
+            the corresponding reference answers if available.
+        3.  **Evaluate on Key Metrics:** \
+            Assess each answer based on Correctness, \
+            Completeness, and Confidence.
+        4.  **Aggregate by Skill:** \
+            Synthesize the performance for each skill \
+            assessed during the interview.
+        5.  **Generate the Final Report:** \
+            Output the complete evaluation in the specified JSON format.
 
-**EVALUATION INSTRUCTIONS:**
-Please provide a detailed evaluation in the following JSON format. \
-    Be constructive, specific, and professional in your feedback.
+        ---
 
-{{
-    "overall_score": <number between 1-100>,
-    "performance_summary": "<2-3 sentence overall assessment>",
-    "strengths": [
-        "<specific strength 1>",
-        "<specific strength 2>",
-        "<specific strength 3>"
-    ],
-    "areas_for_improvement": [
-        "<specific area 1>",
-        "<specific area 2>",
-        "<specific area 3>"
-    ],
-    "technical_competency": {{
-        "score": <number between 1-100>,
-        "feedback": "<detailed technical assessment>"
-    }},
-    "communication_skills": {{
-        "score": <number between 1-100>,
-        "feedback": "<assessment of communication clarity, articulation>"
-    }},
-    "problem_solving": {{
-        "score": <number between 1-100>,
-        "feedback": "<assessment of analytical thinking and approach>"
-    }},
-    "cultural_fit": {{
-        "score": <number between 1-100>,
-        "feedback": \
-            "<assessment of enthusiasm, collaboration, values alignment>"
-    }},
-    "detailed_feedback": {{
-        "positive_highlights": [
-            "<specific positive moment 1>",
-            "<specific positive moment 2>"
-        ],
-        "improvement_suggestions": [
-            "<actionable suggestion 1>",
-            "<actionable suggestion 2>",
-            "<actionable suggestion 3>"
-        ]
-    }},
-    "next_steps": [
-        "<recommendation 1>",
-        "<recommendation 2>",
-        "<recommendation 3>"
-    ],
-    "interview_grade": "<letter grade: A+, A, A-, B+, B, B-, C+, C, C-, D, F>"
-}}
+        ## CONTEXT FOR EVALUATION
+        -   **Company:** {company}
+        -   **Role:** {role}
+        -   **Candidate:** {user_name}
+        -   **Skills Assessed:** {skills_text}
+        -   **Full Conversation Transcript:** `{conversation_text}`
 
-**EVALUATION CRITERIA:**
-1. **Technical Competency (30%)**: \
-    Knowledge depth, accuracy, problem-solving approach
-2. **Communication Skills (25%)**: \
-    Clarity, articulation, listening, asking questions
-3. **Problem Solving (25%)**: \
-    Analytical thinking, approach to challenges, creativity
-4. **Cultural Fit (20%)**: \
-    Enthusiasm, collaboration, growth mindset, values alignment
+        ---
 
-**GUIDELINES:**
-- Be specific with examples from the conversation
-- Provide actionable feedback for improvement
-- Consider the role and company context
-- Be encouraging while being honest about areas for growth
-- Focus on both technical and soft skills
-- Provide constructive criticism with suggestions
+        ## KEY EVALUATION DIRECTIVES
 
-Return ONLY the JSON response, no additional text.
-"""
+        ### 1. Primary Evaluation Metrics
+        Base all your feedback on these three pillars. \
+        Reference answers (when available) are the \
+        benchmark for "Excellent" (100).
+        -   **Correctness:** \
+            How technically accurate was the answer compared \
+            to expected knowledge? Was the information factually right?
+        -   **Completeness:** \
+            Did the answer cover all the key points that \
+            should be addressed? How deep was the knowledge?
+        -   **Confidence:** \
+            How was the answer delivered? Was it structured, \
+            clear, and assertive, or hesitant and disorganized?
+
+        ### 2. Skill-Level Performance Tracking (CRITICAL)
+        You MUST provide a summary for each \
+        individual skill listed in `{skills_text}`.
+        -   **Analyze & Aggregate:** \
+            For each skill (e.g., "Python"), look at all questions \
+            that touched upon that topic.
+        -   **Assign a Score:** \
+            Based on the user's performance across those specific \
+            questions, assign a score that reflects their overall \
+            proficiency in that skill.
+        -   **Provide Feedback:** \
+            Briefly explain why you gave that score. If their \
+            performance met expectations for the role, state that. \
+            If it was below expectations, note the key gaps.
+
+        ### 3. Reference Answer Generation (CRITICAL)
+        For each question in the detailed breakdown, \
+        you MUST provide a reference answer:
+        -   **Use Available References:** \
+            When reference answers are provided in \
+            the context, use them as a baseline.
+        -   **Generate Optimal Answers:** \
+            When no reference is available, generate the optimal \
+            answer that would demonstrate excellence for that \
+            specific question.
+        -   **Role-Specific:** \
+            Tailor the reference answer to be appropriate \
+            for the {role} position at {company}.
+        -   **Completeness:** \
+            Ensure the reference answer covers all key \
+            points that should be addressed for maximum \
+            correctness and completeness.
+
+        ---
+
+        ## OUTPUT FORMAT
+        **CRITICAL:** Generate your response **only** in the \
+        following JSON format. Do not add any text before or \
+        after the JSON object.
+
+        {{
+            "final_score": <number, weighted average from 1-100>,
+            "overall_feedback":
+            "<A 2-3 sentence summary of the candidate's performance, \
+            highlighting their general fit for the role's technical \
+            requirements based on the interview.>",
+            "skill_performance_summary": {{
+                "<skill_1_name>": {{
+                    "score": <number from 1-100>,
+                    "feedback":
+                    "<Brief assessment of proficiency in this skill. \
+                    State if it meets or is below expectations for the \
+                    role. e.g., 'Exceeded expectations. Demonstrated \
+                    deep understanding of async patterns.' or \
+                    'Below expectations. Struggled with fundamental \
+                    concepts like joins.'>"
+                }},
+                "<skill_2_name>": {{
+                    "score": <number from 1-100>,
+                    "feedback": "<Feedback for the second skill...>"
+                }}
+            }},
+            "strengths": [
+                "<A specific, concise strength observed, \
+                tied to an example from the interview.>",
+                "<Another specific strength.>"
+            ],
+            "areas_for_improvement": [
+                "<A specific, actionable area for improvement, \
+                referencing a gap compared to expected knowledge.>",
+                "<Another specific area for improvement.>"
+            ],
+            "detailed_breakdown": [
+                {{
+                    "question_number": 1,
+                    "question": "<The first question asked>",
+                    "user_answer": "<The user's answer to the first question>",
+                    "reference_answer":
+                    "<The optimal/expected answer based on \
+                        the reference knowledge base>",
+                    "evaluation": {{
+                        "correctness": {{ "score": <number from 1-100>,
+                        "feedback":
+                        "<Brief justification for correctness score.>" }},
+                        "completeness": {{ "score": <number from 1-100>,
+                        "feedback":
+                        "<Brief justification for completeness score.>" }},
+                        "confidence": {{ "score": <number from 1-100>,
+                        "feedback":
+                        "<Brief justification for confidence score.>" }}
+                    }}
+                }}
+            ]
+        }}
+        """
         return prompt
 
     def _parse_evaluation_response(self, response_text: str) -> Dict[str, Any]:
@@ -490,10 +565,9 @@ Return ONLY the JSON response, no additional text.
 
             # Validate required fields (enhanced structure)
             required_fields = [
-                'overall_score', 'performance_summary', 'strengths',
-                'areas_for_improvement', 'technical_competency',
-                'communication_skills', 'problem_solving', 'cultural_fit',
-                'detailed_feedback', 'next_steps', 'interview_grade'
+                'final_score', 'overall_feedback', 'strengths',
+                'areas_for_improvement', 'skill_performance_summary',
+                'detailed_breakdown'
             ]
 
             for field in required_fields:
@@ -524,6 +598,18 @@ Return ONLY the JSON response, no additional text.
             logger.error(f"Error parsing evaluation response: {e}")
             return self._create_fallback_evaluation(response_text)
 
+    def _sanitize_score(self, score, default=50):
+        """Ensure score is valid (>= 1)."""
+        if score is None or not isinstance(score, (int, float)):
+            return default
+        return max(1, int(score))
+
+    def _sanitize_string(self, value, default=""):
+        """Ensure string value is valid."""
+        if value is None or not isinstance(value, str):
+            return default
+        return str(value).strip() if value else default
+
     def _sanitize_evaluation_data(self, evaluation:
                                   Dict[str, Any]) -> Dict[str, Any]:
         """Sanitize evaluation data to
@@ -531,13 +617,124 @@ Return ONLY the JSON response, no additional text.
         try:
             sanitized = evaluation.copy()
 
-            # Ensure overall_score is valid (>= 1)
-            if 'overall_score' not in sanitized or \
-                    sanitized['overall_score'] is None or \
-                    sanitized['overall_score'] < 1:
-                sanitized['overall_score'] = 50
+            # Ensure final_score is valid (>= 1)
+            sanitized['final_score'] = self._sanitize_score(
+                sanitized.get('final_score'), 50
+            )
 
-            # Sanitize competency scores
+            # Handle legacy overall_score field mapping
+            # (always populate for backward compatibility)
+            sanitized['overall_score'] = self._sanitize_score(
+                sanitized.get('overall_score',
+                              sanitized.get('final_score')), 50
+            )
+
+            # Ensure overall_feedback exists and map to
+            # performance_summary for backward compatibility
+            sanitized['overall_feedback'] = self._sanitize_string(
+                sanitized.get('overall_feedback') or
+                sanitized.get('performance_summary'),
+                "Unable to provide detailed feedback"
+            )
+
+            # Always populate performance_summary for backward compatibility
+            sanitized['performance_summary'] = sanitized['overall_feedback']
+
+            # Ensure skill_performance_summary exists and sanitize scores
+            if 'skill_performance_summary' not in sanitized or \
+                    not isinstance(sanitized['skill_performance_summary'],
+                                   dict):
+                sanitized['skill_performance_summary'] = {}
+            else:
+                # Sanitize each skill's score and feedback
+                for skill_name, skill_data in \
+                        sanitized['skill_performance_summary'].items():
+                    if not isinstance(skill_data, dict):
+                        sanitized['skill_performance_summary'][skill_name] = {
+                            'score': 50,
+                            'feedback': f"Unable to assess {skill_name}"
+                        }
+                    else:
+                        # Ensure score is valid (>= 1)
+                        skill_data['score'] = \
+                            self._sanitize_score(skill_data.get('score'), 50)
+                        # Ensure feedback exists
+                        skill_data['feedback'] = self._sanitize_string(
+                            skill_data.get('feedback'),
+                            f"Assessment for {skill_name} unavailable"
+                        )
+
+            # Ensure detailed_breakdown exists and sanitize
+            if 'detailed_breakdown' not in sanitized or \
+                    not isinstance(sanitized['detailed_breakdown'], list):
+                sanitized['detailed_breakdown'] = []
+            else:
+                # Sanitize each question breakdown
+                for i, breakdown in enumerate(sanitized['detailed_breakdown']):
+                    if not isinstance(breakdown, dict):
+                        continue
+
+                    # Ensure user_answer is a valid string
+                    breakdown['user_answer'] = self._sanitize_string(
+                        breakdown.get('user_answer'), "No answer provided"
+                    )
+
+                    # Ensure question is a valid string
+                    breakdown['question'] = self._sanitize_string(
+                        breakdown.get('question'),
+                        f"Interview question {i + 1}"
+                    )
+
+                    # Ensure reference_answer is a valid string
+                    breakdown['reference_answer'] = self._sanitize_string(
+                        breakdown.get('reference_answer'),
+                        "No reference answer available"
+                    )
+
+                    # Ensure question_number is valid
+                    if 'question_number' not in breakdown or \
+                            breakdown['question_number'] is None:
+                        breakdown['question_number'] = i + 1
+
+                    # Sanitize evaluation metrics
+                    if 'evaluation' not in breakdown or \
+                            not isinstance(breakdown['evaluation'], dict):
+                        breakdown['evaluation'] = {
+                            'correctness':
+                                {'score': 50, 'feedback':
+                                    'Unable to assess correctness'},
+                            'completeness':
+                                {'score': 50, 'feedback':
+                                    'Unable to assess completeness'},
+                            'confidence':
+                                {'score': 50, 'feedback':
+                                    'Unable to assess confidence'}
+                        }
+                    else:
+                        eval_data = breakdown['evaluation']
+                        for metric in ['correctness',
+                                       'completeness', 'confidence']:
+                            if metric not in eval_data or \
+                                    not isinstance(eval_data[metric], dict):
+                                eval_data[metric] = {
+                                    'score': 50,
+                                    'feedback':
+                                        f'Unable to assess {metric}'
+                                }
+                            else:
+                                # Ensure score is valid (>= 1)
+                                eval_data[metric]['score'] = \
+                                    self._sanitize_score(
+                                    eval_data[metric].get('score'), 50
+                                )
+                                # Ensure feedback exists
+                                eval_data[metric]['feedback'] = \
+                                    self._sanitize_string(
+                                    eval_data[metric].get('feedback'),
+                                    f'Assessment for {metric} unavailable'
+                                )
+
+            # Always populate backward compatibility fields
             competency_fields = \
                 ['technical_competency', 'communication_skills',
                  'problem_solving', 'cultural_fit']
@@ -549,22 +746,41 @@ Return ONLY the JSON response, no additional text.
                             f"Unable to assess {field.replace('_', ' ')}"}
                 else:
                     # Ensure score is valid (>= 1)
-                    if 'score' not in sanitized[field] or \
-                            sanitized[field]['score'] is None or \
-                            sanitized[field]['score'] < 1:
-                        sanitized[field]['score'] = 50
+                    sanitized[field]['score'] = self._sanitize_score(
+                        sanitized[field].get('score'), 50
+                    )
                     # Ensure feedback is valid string
-                    if 'feedback' not in sanitized[field] or \
-                            sanitized[field]['feedback'] is None:
-                        sanitized[field]['feedback'] = \
-                            f"Assessment for {field.replace('_', ' ')} \
-                                unavailable"
+                    sanitized[field]['feedback'] = self._sanitize_string(
+                        sanitized[field].get('feedback'),
+                        f"Assessment for {field.replace('_', ' ')} unavailable"
+                    )
 
-            # Ensure reference_coverage_score is valid if present
-            if 'reference_coverage_score' in sanitized:
-                if sanitized['reference_coverage_score'] is None or \
-                        sanitized['reference_coverage_score'] < 1:
-                    sanitized['reference_coverage_score'] = 50
+            # Ensure detailed_feedback exists for backward compatibility
+            if 'detailed_feedback' not in sanitized or \
+                    not isinstance(sanitized['detailed_feedback'], dict):
+                sanitized['detailed_feedback'] = {
+                    'positive_highlights': [],
+                    'improvement_suggestions': []
+                }
+
+            # Ensure next_steps exists
+            if 'next_steps' not in sanitized or \
+                    not isinstance(sanitized['next_steps'], list):
+                sanitized['next_steps'] = []
+
+            # Ensure interview_grade exists
+            if 'interview_grade' not in sanitized:
+                sanitized['interview_grade'] = 'B-'
+
+            # Ensure strengths exists
+            if 'strengths' not in sanitized or \
+                    not isinstance(sanitized['strengths'], list):
+                sanitized['strengths'] = []
+
+            # Ensure areas_for_improvement exists
+            if 'areas_for_improvement' not in sanitized or \
+                    not isinstance(sanitized['areas_for_improvement'], list):
+                sanitized['areas_for_improvement'] = []
 
             return sanitized
 
@@ -584,19 +800,20 @@ Return ONLY the JSON response, no additional text.
                 sanitized['question_number'] = index + 1
 
             # Ensure question is a valid string
-            if 'question' not in sanitized or sanitized['question'] is None:
-                sanitized['question'] = f"Interview question {index + 1}"
+            sanitized['question'] = self._sanitize_string(
+                sanitized.get('question'), f"Interview question {index + 1}"
+            )
 
             # Ensure user_answer is a valid string
-            if 'user_answer' not in sanitized or \
-                    sanitized['user_answer'] is None:
-                sanitized['user_answer'] = "No answer provided"
+            sanitized['user_answer'] = self._sanitize_string(
+                sanitized.get('user_answer'), "No answer provided"
+            )
 
             # Ensure reference_answer is a valid string
-            if 'reference_answer' not in sanitized or \
-                    sanitized['reference_answer'] is None:
-                sanitized['reference_answer'] = \
-                    "No reference answer available"
+            sanitized['reference_answer'] = self._sanitize_string(
+                sanitized.get('reference_answer'),
+                "No reference answer available"
+            )
 
             # Sanitize assessment dimensions
             for dimension in ['accurateness', 'confidence', 'completeness']:
@@ -607,21 +824,19 @@ Return ONLY the JSON response, no additional text.
                             f"Unable to assess {dimension}"}
                 else:
                     # Ensure score is valid (>= 1)
-                    if 'score' not in sanitized[dimension] or \
-                        sanitized[dimension]['score'] is None or \
-                            sanitized[dimension]['score'] < 1:
-                        sanitized[dimension]['score'] = 50
+                    sanitized[dimension]['score'] = self._sanitize_score(
+                        sanitized[dimension].get('score'), 50
+                    )
                     # Ensure feedback is valid string
-                    if 'feedback' not in sanitized[dimension] or \
-                            sanitized[dimension]['feedback'] is None:
-                        sanitized[dimension]['feedback'] = \
-                            f"Assessment for {dimension} unavailable"
+                    sanitized[dimension]['feedback'] = self._sanitize_string(
+                        sanitized[dimension].get('feedback'),
+                        f"Assessment for {dimension} unavailable"
+                    )
 
             # Ensure overall_answer_score is valid (>= 1)
-            if 'overall_answer_score' not in sanitized or \
-                sanitized['overall_answer_score'] is None or \
-                    sanitized['overall_answer_score'] < 1:
-                sanitized['overall_answer_score'] = 50
+            sanitized['overall_answer_score'] = self._sanitize_score(
+                sanitized.get('overall_answer_score'), 50
+            )
 
             return sanitized
 
@@ -647,30 +862,39 @@ Return ONLY the JSON response, no additional text.
                                     ) -> Dict[str, Any]:
         """Create a fallback evaluation if parsing fails."""
         return {
-            "overall_score": 70,
-            "performance_summary": ("The evaluation could not be fully "
-                                    "processed, but the candidate showed "
-                                    "engagement throughout the interview."),
-            "individual_answer_assessments": [
+            "final_score": 70,
+            "overall_feedback": ("The evaluation could not be fully "
+                                 "processed, but the candidate showed "
+                                 "engagement throughout the interview."),
+            "skill_performance_summary": {
+                "General Skills": {
+                    "score": 70,
+                    "feedback":
+                        "Unable to assess specific \
+                            skills due to parsing issues"
+                }
+            },
+            "detailed_breakdown": [
                 {
                     "question_number": 1,
                     "question": "General interview question",
                     "user_answer": "Candidate provided responses",
-                    "reference_answer": "No reference available",
-                    "accurateness": {
-                        "score": 70,
-                        "feedback": "Unable to assess accuracy due to "
-                                    "parsing issues"
-                    },
-                    "confidence": {
-                        "score": 75,
-                        "feedback": "Candidate appeared confident in responses"
-                    },
-                    "completeness": {
-                        "score": 70,
-                        "feedback": "Unable to fully assess completeness"
-                    },
-                    "overall_answer_score": 70
+                    "evaluation": {
+                        "correctness": {
+                            "score": 70,
+                            "feedback": "Unable to assess correctness due to "
+                                        "parsing issues"
+                        },
+                        "completeness": {
+                            "score": 70,
+                            "feedback": "Unable to fully assess completeness"
+                        },
+                        "confidence": {
+                            "score": 75,
+                            "feedback":
+                                "Candidate appeared confident in responses"
+                        }
+                    }
                 }
             ],
             "strengths": [
@@ -683,6 +907,11 @@ Return ONLY the JSON response, no additional text.
                 "More specific examples would strengthen responses",
                 "Consider practicing common interview questions"
             ],
+            # Maintain backward compatibility
+            "overall_score": 70,
+            "performance_summary": ("The evaluation could not be fully "
+                                    "processed, but the candidate showed "
+                                    "engagement throughout the interview."),
             "technical_competency": {
                 "score": 70,
                 "feedback": "Technical skills assessment needs more detailed "
@@ -745,40 +974,71 @@ Return ONLY the JSON response, no additional text.
 
         evaluation = evaluation_result.get('evaluation', {})
 
-        # Extract individual answer metrics
-        individual_assessments = evaluation.get(
-            'individual_answer_assessments', [])
+        # Extract individual answer metrics from new structure
+        detailed_breakdown = evaluation.get('detailed_breakdown', [])
         answer_metrics = []
 
-        for assessment in individual_assessments:
+        for assessment in detailed_breakdown:
+            eval_data = assessment.get('evaluation', {})
             answer_metrics.append({
                 'question_number': assessment.get('question_number', 0),
                 'question': assessment.get('question', ''),
-                'accurateness_score': assessment.get('accurateness', {}).get(
-                    'score', 0),
-                'confidence_score': assessment.get('confidence', {}).get(
-                    'score', 0),
-                'completeness_score': assessment.get('completeness', {}).get(
-                    'score', 0),
-                'overall_score': assessment.get('overall_answer_score', 0)
+                'correctness_score':
+                    eval_data.get('correctness', {}).get('score', 0),
+                'completeness_score':
+                    eval_data.get('completeness', {}).get('score', 0),
+                'confidence_score':
+                    eval_data.get('confidence', {}).get('score', 0),
+                'overall_score': (
+                    eval_data.get('correctness', {}).get('score', 0) +
+                    eval_data.get('completeness', {}).get('score', 0) +
+                    eval_data.get('confidence', {}).get('score', 0)
+                ) / 3 if eval_data else 0
             })
+
+        # Fallback to old structure if new one is not available
+        if not answer_metrics:
+            individual_assessments = \
+                evaluation.get('individual_answer_assessments', [])
+            for assessment in individual_assessments:
+                answer_metrics.append({
+                    'question_number': assessment.get('question_number', 0),
+                    'question': assessment.get('question', ''),
+                    'correctness_score':
+                        assessment.get('accurateness', {}).get('score', 0),
+                    'completeness_score':
+                        assessment.get('completeness', {}).get('score', 0),
+                    'confidence_score':
+                        assessment.get('confidence', {}).get('score', 0),
+                    'overall_score': assessment.get('overall_answer_score', 0)
+                })
 
         # Calculate average scores for each dimension
         total_assessments = len(answer_metrics)
-        avg_accurateness = (sum(a['accurateness_score']
+        avg_correctness = (sum(a['correctness_score']
+                               for a in answer_metrics) / total_assessments
+                           if total_assessments > 0 else 0)
+        avg_completeness = (sum(a['completeness_score']
                                 for a in answer_metrics) / total_assessments
                             if total_assessments > 0 else 0)
         avg_confidence = (sum(a['confidence_score']
                               for a in answer_metrics) / total_assessments
                           if total_assessments > 0 else 0)
-        avg_completeness = (sum(a['completeness_score']
-                                for a in answer_metrics) / total_assessments
-                            if total_assessments > 0 else 0)
+
+        # Get skill performance data
+        skill_performance = evaluation.get('skill_performance_summary', {})
 
         return {
             'success': True,
-            'overall_score': evaluation.get('overall_score', 0),
-            'interview_grade': evaluation.get('interview_grade', 'N/A'),
+            'overall_score':
+                evaluation.get('final_score',
+                               evaluation.get('overall_score', 0)),
+            'overall_feedback':
+                evaluation.get('overall_feedback',
+                               evaluation.get('performance_summary', '')),
+            'skill_performance_summary': skill_performance,
+            'interview_grade':
+                evaluation.get('interview_grade', 'N/A'),
             'reference_coverage_score':
                 evaluation.get('reference_coverage_score', 0),
             'dimension_scores': {
@@ -790,12 +1050,12 @@ Return ONLY the JSON response, no additional text.
                     evaluation.get('problem_solving', {}).get('score', 0),
                 'cultural_fit':
                     evaluation.get('cultural_fit', {}).get('score', 0)
-            },
+                },
             'assessment_averages': {
-                'accurateness': round(avg_accurateness, 1),
-                'confidence': round(avg_confidence, 1),
-                'completeness': round(avg_completeness, 1)
-            },
+                'correctness': round(avg_correctness, 1),
+                'completeness': round(avg_completeness, 1),
+                'confidence': round(avg_confidence, 1)
+                },
             'individual_answers': answer_metrics,
             'strengths': evaluation.get('strengths', []),
             'areas_for_improvement':
@@ -820,7 +1080,8 @@ Return ONLY the JSON response, no additional text.
             return "Evaluation could not be completed due to an error."
 
         evaluation = evaluation_result.get('evaluation', {})
-        overall_score = evaluation.get('overall_score', 0)
+        overall_score = evaluation.get('final_score',
+                                       evaluation.get('overall_score', 0))
         grade = evaluation.get('interview_grade', 'N/A')
         reference_coverage = evaluation.get('reference_coverage_score', 0)
 
