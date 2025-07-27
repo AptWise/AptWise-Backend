@@ -300,8 +300,11 @@ class AIInterviewService:
         2.  **Formulate a Reply:** Craft a "Response" that replies to \
             the user's answer.
         3.  **Ask a New Question:** In the same "Response", ask a new, \
-            single question based on the provided `{skill_context}` and \
-            the user's performance so far.
+            single question based on the provided context and \
+            the user's performance so far. You can refer to \
+            the "Available Questions" section below for ideas. \
+            Do not ask any question that was previously asked \
+            in the conversation history.
         4.  **Plan the Next Topic:** Decide what topic you will ask \
             about in the *following* turn and place it in "SearchContext".
 
