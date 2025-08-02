@@ -162,6 +162,14 @@ class AIPresetService:
         5. **skills**: A comprehensive list of technical \
             and soft skills relevant to this role
 
+        ## Important Notes
+        **You should first check if the skills are present in the \
+        and then generate a comprehensive list of skills.\
+        Do not duplicate skills that are already in the user's \
+        existing skills e.g., if the user has React in his skills \
+        then do not include additional skills like \
+        React (frontend) etc.**
+
         ## User Input
         **Description**: {description}
         {user_skills_text}
