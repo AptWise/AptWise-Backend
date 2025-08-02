@@ -622,6 +622,84 @@ def remove_user_skill(email: str, skill: str) -> bool:
     return delete_user_skill(email, skill)  # Reuse existing function
 
 
+def update_user_skills_from_evaluation(email: str,
+                                       skill_assessments:
+                                       Dict[str, int]
+                                       ) -> bool:
+    """
+    Update user skills based on interview evaluation results.
+
+    Args:
+        email: User's email
+        skill_assessments: Dictionary mapping skill
+        names to proficiency levels (1-5)
+
+    Returns:
+        bool: True if all updates were successful, False otherwise
+    """
+    if not skill_assessments:
+        return True  # Nothing to update
+
+    session = get_session()
+    if not session:
+        raise RuntimeError("Database connection not available")
+
+    try:
+        for skill_name, proficiency_level in skill_assessments.items():
+            # Validate proficiency level
+            if not isinstance(proficiency_level, int) \
+                or proficiency_level < 1 \
+                    or proficiency_level > 5:
+                print(f"Invalid proficiency level {proficiency_level}\
+                       for skill {skill_name}")
+                continue
+
+            # Check if skill already exists for user
+            check_query = text("""
+                SELECT COUNT(*) FROM user_skills
+                WHERE email = :email AND skill = :skill
+            """)
+            result = session.execute(check_query,
+                                     {"email": email,
+                                      "skill": skill_name
+                                      })
+            exists = result.scalar() > 0
+
+            if exists:
+                # Update existing skill
+                update_query = text("""
+                    UPDATE user_skills
+                    SET proficiency = :proficiency
+                    WHERE email = :email AND skill = :skill
+                """)
+                session.execute(update_query, {
+                    "email": email,
+                    "skill": skill_name,
+                    "proficiency": str(proficiency_level)
+                })
+            else:
+                # Insert new skill
+                insert_query = text("""
+                    INSERT INTO user_skills (email, skill, proficiency)
+                    VALUES (:email, :skill, :proficiency)
+                """)
+                session.execute(insert_query, {
+                    "email": email,
+                    "skill": skill_name,
+                    "proficiency": str(proficiency_level)
+                })
+
+        session.commit()
+        session.close()
+        return True
+
+    except Exception as e:
+        session.rollback()
+        session.close()
+        print(f"Error updating user skills from evaluation: {e}")
+        return False
+
+
 def create_user_interview(email: str,
                           title: str,
                           interview_text: str

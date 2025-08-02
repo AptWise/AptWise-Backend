@@ -8,6 +8,7 @@ import google.generativeai as genai
 from datetime import datetime
 import logging
 from ..utils.qdrant_service import QdrantVectorService
+from ..database import get_user_skills, update_user_skills_from_evaluation
 
 logger = logging.getLogger(__name__)
 
@@ -104,17 +105,92 @@ class InterviewEvaluationService:
                 'error': str(e)
             }
 
+    def get_user_current_skills(self, user_email: str) -> Dict[str, int]:
+        """
+        Get user's current skill levels from the database.
+
+        Args:
+            user_email: User's email address
+
+        Returns:
+            Dictionary mapping skill names to proficiency levels (1-5)
+        """
+        try:
+            user_skills = get_user_skills(user_email)
+            return {skill['skill']: int(skill['proficiency'])
+                    for skill in user_skills}
+        except Exception as e:
+            logger.error(f"Error fetching user skills: {e}")
+            return {}
+
+    def _add_unassessed_skills(self,
+                               evaluation_result: Dict[str, Any],
+                               expected_skills: List[str]
+                               ) -> Dict[str, Any]:
+        """
+        Add unassessed skills to a separate section for frontend display.
+
+        Args:
+            evaluation_result: The parsed evaluation result
+            expected_skills: List of skills that were expected to be assessed
+
+        Returns:
+            Enhanced evaluation result with unassessed skills section
+        """
+        try:
+            # Get skills that were actually assessed
+            assessed_skills = set()
+            if 'skill_performance_summary' in evaluation_result:
+                assessed_skills.update(
+                    evaluation_result['skill_performance_summary'].keys()
+                    )
+            if 'skill_level_assessment' in evaluation_result:
+                assessed_skills.update(
+                    evaluation_result['skill_level_assessment'].keys()
+                    )
+
+            # Find skills that were expected but not assessed
+            expected_skills_set = set(expected_skills) \
+                if expected_skills else set()
+            unassessed_skills = expected_skills_set - assessed_skills
+
+            # Add unassessed skills section
+            if unassessed_skills:
+                unassessed_list = []
+                for skill in unassessed_skills:
+                    unassessed_list.append({
+                        'skill': skill,
+                        'reason': f"No questions about {skill} \
+                            were asked during the interview"
+                    })
+
+                evaluation_result['skills_not_assessed'] = unassessed_list
+                logger.info(f"Added {len(unassessed_skills)} \
+                            unassessed skills to evaluation result")
+            else:
+                evaluation_result['skills_not_assessed'] = []
+
+            return evaluation_result
+
+        except Exception as e:
+            logger.error(f"Error adding unassessed skills: {e}")
+            # Ensure the field exists even if there's an error
+            evaluation_result['skills_not_assessed'] = []
+            return evaluation_result
+
     def evaluate_interview(self,
                            interview_data: Dict[str, Any],
-                           conversation_history: List[Dict[str, str]]
+                           conversation_history: List[Dict[str, str]],
+                           user_email: str = None
                            ) -> Dict[str, Any]:
         """
         Evaluate an interview using Gemini AI with vector database reference
-        context.
+        context and update user skill levels.
 
         Args:
             interview_data: Dictionary containing interview metadata
             conversation_history: List of conversation messages
+            user_email: User's email for skill level updates (optional)
 
         Returns:
             Dictionary containing evaluation results
@@ -126,11 +202,18 @@ class InterviewEvaluationService:
                 self.get_reference_context(skills,
                                            conversation_history)
 
-            # Build the evaluation prompt with reference context
+            # Get user's current skill levels if email is provided
+            current_user_skills = {}
+            if user_email:
+                current_user_skills = self.get_user_current_skills(user_email)
+
+            # Build the evaluation prompt with
+            # reference context and current skills
             prompt = self._build_evaluation_prompt_with_context(
                 interview_data,
                 conversation_history,
-                reference_context
+                reference_context,
+                current_user_skills
             )
 
             # Get evaluation from Gemini
@@ -139,12 +222,34 @@ class InterviewEvaluationService:
             # Parse the response
             evaluation_result = self._parse_evaluation_response(response.text)
 
+            # Add expected skills information for proper not-assessed handling
+            evaluation_result = self.\
+                _add_unassessed_skills(evaluation_result, skills)
+
+            # Update user skill levels if email is provided
+            # and we have skill evaluations
+            if user_email and 'skill_level_assessment' in evaluation_result:
+                skill_updates = evaluation_result['skill_level_assessment']
+                try:
+                    update_success = \
+                        update_user_skills_from_evaluation(user_email,
+                                                           skill_updates)
+                    if update_success:
+                        logger.info(f"Successfully updated skill levels \
+                                    for user {user_email}")
+                    else:
+                        logger.warning(f"Failed to update skill \
+                                       levels for user {user_email}")
+                except Exception as e:
+                    logger.error(f"Error updating user skills: {e}")
+
             return {
                 "success": True,
                 "evaluation": evaluation_result,
                 "evaluated_at": datetime.now().isoformat(),
                 "reference_context_used": len(reference_context.get(
-                    'questions_with_references', []))
+                    'questions_with_references', [])),
+                "skills_updated": user_email is not None
             }
 
         except Exception as e:
@@ -156,13 +261,17 @@ class InterviewEvaluationService:
             }
 
     def _build_evaluation_prompt_with_context(self,
-                                              interview_data: Dict[str, Any],
-                                              conversation_history: List[
-                                                  Dict[str, str]],
-                                              reference_context: Dict[str, Any]
+                                              interview_data:
+                                              Dict[str, Any],
+                                              conversation_history:
+                                              List[Dict[str, str]],
+                                              reference_context:
+                                              Dict[str, Any],
+                                              current_user_skills:
+                                              Dict[str, int] = None
                                               ) -> str:
         """Build the evaluation prompt with vector database reference
-        context."""
+        context and user's current skill levels."""
 
         # Extract interview context
         company = interview_data.get('company', 'Unknown Company')
@@ -207,6 +316,17 @@ Similarity Score: {similarity:.2f}
             reference_text = ("\n**No reference answers available from "
                               "vector database.**\n")
 
+        # Format current user skills
+        current_skills_text = ""
+        if current_user_skills:
+            current_skills_text = "\n**USER'S CURRENT SKILL LEVELS:**\n"
+            for skill, level in current_user_skills.items():
+                current_skills_text += f"{skill}: Level {level}/5\n"
+            current_skills_text += "---\n"
+        else:
+            current_skills_text = "\n**No previous skill \
+                assessments available.**\n"
+
         prompt = f"""
         ## Core Objective & Persona
         You are a discerning and insightful career coach. \
@@ -225,7 +345,10 @@ Similarity Score: {similarity:.2f}
             Review the entire `{conversation_text}`.
         2.  **Compare to Ground Truth:** \
             For each user answer, critically compare it to the \
-            corresponding `{reference_text}`.
+            corresponding `{reference_text}` If the user answer \
+            is not related to the ground truth then use your \
+            own judgement to evaluate its relevance to the \
+            question.
         3.  **Evaluate on Key Metrics:** \
             Assess each answer based on Correctness, Completeness, \
             and Confidence.
@@ -244,6 +367,7 @@ Similarity Score: {similarity:.2f}
         -   **Skills Assessed:** {skills_text}
         -   **Full Conversation Transcript:** `{conversation_text}`
         -   **Reference Answers (Ground Truth):** `{reference_text}`
+        -   **User's Current Skill Levels:** `{current_skills_text}`
 
         ---
 
@@ -258,6 +382,9 @@ Similarity Score: {similarity:.2f}
         -   **Completeness:** \
             Did the answer cover all the key points and nuances \
             mentioned in the reference answer? How deep was the knowledge?
+            If the user answer and the reference answer are of different \
+            topics then judge based on your understanding of the user's \
+            answer and the question asked to the user.
         -   **Confidence:** \
             How was the answer delivered? Was it structured, \
             clear, and assertive, or hesitant and disorganized?
@@ -277,7 +404,27 @@ Similarity Score: {similarity:.2f}
             performance met expectations for the role, state that. \
             If it was below expectations, note the key gaps.
 
-        ### 3. Reference Answer Generation (CRITICAL)
+        ### 3. Conservative Skill Level Assessment (NEW - CRITICAL)
+        For each skill in the skill_level_assessment section, \
+        provide a CONSERVATIVE estimate of the candidate's \
+        actual skill level on a 1-5 scale:
+        -   **Level 1:** Beginner - Basic understanding, \
+            needs significant guidance
+        -   **Level 2:** Novice - Some knowledge, requires \
+            supervision
+        -   **Level 3:** Intermediate - Solid foundation, can \
+            work independently on basic tasks
+        -   **Level 4:** Advanced - Strong proficiency, can \
+            handle complex tasks
+        -   **Level 5:** Expert - Deep expertise, can mentor \
+            others and solve complex problems
+
+        **IMPORTANT:** Be conservative in your assessment. \
+        Consider the user's current skill levels provided above. \
+        Only assign higher levels if the interview clearly demonstrates \
+        mastery at that level. When in doubt, assign the lower level.
+
+        ### 4. Reference Answer Generation (CRITICAL)
         For each question in the detailed breakdown, \
         you MUST provide a reference answer:
         -   **Use Available References:** \
@@ -359,7 +506,15 @@ Similarity Score: {similarity:.2f}
                     for confidence score.>" }}
             }}
         }}
-    ]
+    ],
+    "skill_level_assessment": {{
+        "<skill_1_name>": \
+            <conservative integer from 1-5 representing \
+            actual skill level>,
+        "<skill_2_name>": \
+            <conservative integer from 1-5 representing \
+            actual skill level>
+    }}
 }}
 """
         return prompt
@@ -950,6 +1105,10 @@ Similarity Score: {similarity:.2f}
             "interview_grade": "B-",
             "reference_coverage_score": 60,
             "raw_response": response_text,
+            "skills_not_assessed": [],
+            "skill_level_assessment": {
+                "General Skills": 3
+            },
             "note": "This is a fallback evaluation due to parsing issues."
         }
 
@@ -1061,6 +1220,10 @@ Similarity Score: {similarity:.2f}
             'areas_for_improvement':
                 evaluation.get('areas_for_improvement', []),
             'next_steps': evaluation.get('next_steps', []),
+            'skills_not_assessed':
+                evaluation.get('skills_not_assessed', []),
+            'skill_level_assessment':
+                evaluation.get('skill_level_assessment', {}),
             'total_questions_assessed': total_assessments
         }
 

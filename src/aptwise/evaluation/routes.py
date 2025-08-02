@@ -70,7 +70,8 @@ async def evaluate_interview(
         # Perform the evaluation
         evaluation_result = evaluation_service.evaluate_interview(
             interview_data=request.interview_data,
-            conversation_history=request.conversation_history
+            conversation_history=request.conversation_history,
+            user_email=current_user if current_user else None
         )
 
         if not evaluation_result["success"]:
@@ -128,7 +129,8 @@ async def extract_evaluation_metrics(
         # Perform the evaluation
         evaluation_result = evaluation_service.evaluate_interview(
             interview_data=request.interview_data,
-            conversation_history=request.conversation_history
+            conversation_history=request.conversation_history,
+            user_email=current_user if current_user else None
         )
 
         # Extract metrics using the utility method
@@ -164,7 +166,8 @@ async def get_evaluation_summary(
         # Perform the evaluation
         evaluation_result = evaluation_service.evaluate_interview(
             interview_data=request.interview_data,
-            conversation_history=request.conversation_history
+            conversation_history=request.conversation_history,
+            user_email=current_user if current_user else None
         )
 
         # Get summary using the utility method
