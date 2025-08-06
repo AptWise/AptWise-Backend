@@ -1,13 +1,17 @@
 """
 AI Interview service using Google Gemini API.
 """
-import os
-import google.generativeai as genai
-from typing import Dict, List, Any, Optional
-import logging
-import random
 import json
+import logging
+import os
+import random
+import re
+from typing import Dict, List, Any, Optional
+
+import google.generativeai as genai
+
 from ..utils.qdrant_service import QdrantVectorService
+from ..utils.updation_service import get_updation_service
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +23,9 @@ class AIInterviewService:
         """Initialize the AI Interview service."""
         self.gemini_api_key = os.getenv("GEMINI_API_KEY")
         if not self.gemini_api_key:
-            raise ValueError("GEMINI_API_KEY not \
-                             found in environment variables")
+            raise ValueError(
+                "GEMINI_API_KEY not found in environment variables"
+            )
 
         # Configure Gemini API
         genai.configure(api_key=self.gemini_api_key)
@@ -28,6 +33,9 @@ class AIInterviewService:
 
         # Initialize vector service for RAG
         self.vector_service = QdrantVectorService()
+
+        # Initialize updation service for question storage
+        self.updation_service = get_updation_service()
 
         logger.info("AI Interview service initialized")
 
@@ -60,19 +68,22 @@ class AIInterviewService:
 
             if matching_skill:
                 selected_skill = matching_skill
-                logger.info(f"Using validated \
-                            search context: {selected_skill}")
+                logger.info(
+                    "Using validated search context: %s", selected_skill
+                )
             else:
                 selected_skill = random.choice(skills)
-                logger.info(f"Search context '{search_context}' \
-                            not in skills list. " +
-                            f"Falling back to random \
-                            skill: {selected_skill}")
+                logger.info(
+                    "Search context '%s' not in skills list. "
+                    "Falling back to random skill: %s",
+                    search_context, selected_skill
+                )
         elif skills:
             # For the first question, select a random skill
             selected_skill = random.choice(skills)
-            logger.info("Selected skill for initial" +
-                        f" context: {selected_skill}")
+            logger.info(
+                "Selected skill for initial context: %s", selected_skill
+            )
         else:
             return "No specific skills provided for context."
 
@@ -97,15 +108,140 @@ class AIInterviewService:
             return "\n".join(context_parts)
 
         except Exception as e:
-            logger.error(f"Error getting skill context: {e}")
+            logger.error("Error getting skill context: %s", e)
             return f"Error retrieving context for topic: {selected_skill}"
+
+    def _extract_and_store_question(self,
+                                    response_text: str,
+                                    skills: List[str],
+                                    user_id: str = "",
+                                    interview_session: str = "") -> None:
+        """
+        Extract questions from LLM response and
+        store them in vector database if not already present.
+
+        Args:
+            response_text: The LLM response containing the question
+            skills: List of skills for context
+            user_id: User ID for tracking
+            interview_session: Interview session ID
+        """
+        try:
+            # Try to parse JSON response first
+            cleaned_response = response_text.strip()
+            if cleaned_response.startswith('```json'):
+                cleaned_response = cleaned_response[7:]
+            if cleaned_response.endswith('```'):
+                cleaned_response = cleaned_response[:-3]
+            cleaned_response = cleaned_response.strip()
+
+            try:
+                response_data = json.loads(cleaned_response)
+                llm_response = response_data.get('Response', '')
+            except json.JSONDecodeError:
+                # If JSON parsing fails, use the raw response
+                llm_response = response_text
+
+            # Extract question from the response
+            # Look for question patterns (sentences ending with ?)
+            question_patterns = [
+                r'[.!]\s*([^.!?]*\?)',  # Question after sentence
+                r'^([^.!?]*\?)',        # Question at start
+                r'(\b(?:What|How|Why|When|Where|Which|Who'
+                r'|Can you|Could you|Tell me|Explain)[^.!]*\?)',
+                # Question words
+            ]
+
+            extracted_questions = []
+            for pattern in question_patterns:
+                matches = re.findall(pattern,
+                                     llm_response,
+                                     re.IGNORECASE | re.MULTILINE)
+                for match in matches:
+                    question = match.strip()
+                    if (len(question) > 10 and
+                            question not in extracted_questions):
+                        # Avoid short/duplicate questions
+                        extracted_questions.append(question)
+
+            # Store each extracted question
+            for question in extracted_questions:
+                if question:
+                    skill_context = ', '.join(skills) if skills else ""
+
+                    # Check and store the question
+                    result = self.updation_service.check_and_store_question(
+                        question=question,
+                        answer="",  # No expected answer from LLM response
+                        metadata={
+                            'skill_context': skill_context,
+                            'user_id': user_id,
+                            'interview_session': interview_session,
+                            'source': 'llm_generated'
+                        }
+                    )
+
+                    logger.info(
+                        "Question storage result: %s - %s...",
+                        result['action_taken'], question[:50]
+                    )
+
+        except Exception as e:
+            logger.error("Error extracting and storing question: %s", e)
+
+    def store_question_manually(self,
+                                question: str,
+                                answer: str = "",
+                                skills: List[str] = None,
+                                user_id: str = "",
+                                interview_session: str = "") -> Dict[str, Any]:
+        """
+        Manually store a question-answer pair in the vector database.
+
+        Args:
+            question: The question text
+            answer: The answer text
+            skills: List of related skills
+            user_id: User ID for tracking
+            interview_session: Interview session ID
+
+        Returns:
+            Result dictionary from the storage operation
+        """
+        try:
+            skill_context = ', '.join(skills) if skills else ""
+
+            result = self.updation_service.check_and_store_question(
+                question=question,
+                answer=answer,
+                metadata={
+                    'skill_context': skill_context,
+                    'user_id': user_id,
+                    'interview_session': interview_session,
+                    'source': 'manual_entry'
+                }
+            )
+
+            logger.info("Manual question storage: %s", result['action_taken'])
+            return result
+
+        except Exception as e:
+            logger.error("Error in manual question storage: %s", e)
+            return {
+                'question': question,
+                'exists': False,
+                'stored': False,
+                'action_taken': 'error',
+                'error': str(e)
+            }
 
     def generate_interview_question(
         self,
         user_details: Dict[str, Any],
         skills: List[str],
         conversation_history: str,
-        search_context: Optional[str] = None
+        search_context: Optional[str] = None,
+        store_questions: bool = True
     ) -> Dict[str, Any]:
         """
         Generate an interview question using Gemini API.
@@ -115,6 +251,7 @@ class AIInterviewService:
             skills: List of skills for the interview
             conversation_history: Previous conversation as a string
             search_context: Topic to search for from previous response
+            store_questions: Whether to store generated questions in vector DB
 
         Returns:
             Dictionary containing the response and metadata
@@ -138,9 +275,10 @@ class AIInterviewService:
             logger.info("=" * 80)
 
             # Log basic info without printing full context
-            logger.info("Gemini API Request - User:" +
-                        f" {user_details.get('userName', 'candidate')}," +
-                        f" Skills: {skills}")
+            logger.info(
+                "Gemini API Request - User: %s, Skills: %s",
+                user_details.get('userName', 'candidate'), skills
+            )
 
             # Generate response using Gemini
             response = self.model.generate_content(prompt)
@@ -185,12 +323,26 @@ class AIInterviewService:
 
                         if not valid_context:
                             next_search_context = random.choice(skills)
-                            logger.warning("AI returned invalid \
-                                            SearchContext. Replaced " +
-                                           f"with: {next_search_context}")
+                            logger.warning(
+                                "AI returned invalid SearchContext. "
+                                "Replaced with: %s", next_search_context
+                            )
 
-                    logger.info(f"Successfully parsed JSON response.\
-                    Next search context: {next_search_context}")
+                    logger.info(
+                        "Successfully parsed JSON response. "
+                        "Next search context: %s", next_search_context
+                    )
+
+                    # Store the generated question in vector database
+                    if store_questions:
+                        user_id = user_details.get('userId', '')
+                        interview_session = user_details.get('sessionId', '')
+                        self._extract_and_store_question(
+                            response.text,
+                            skills,
+                            user_id,
+                            interview_session
+                        )
 
                     return {
                         'success': True,
@@ -200,10 +352,20 @@ class AIInterviewService:
                     }
 
                 except json.JSONDecodeError as e:
-                    logger.error(f"Error parsing JSON response: {e}")
-                    logger.error(f"Raw response: {response.text}")
+                    logger.error("Error parsing JSON response: %s", e)
+                    logger.error("Raw response: %s", response.text)
 
                     # Fallback to raw text if JSON parsing fails
+                    if store_questions:
+                        user_id = user_details.get('userId', '')
+                        interview_session = user_details.get('sessionId', '')
+                        self._extract_and_store_question(
+                            response.text,
+                            skills,
+                            user_id,
+                            interview_session
+                        )
+
                     return {
                         'success': True,
                         'question': response.text.strip(),
@@ -215,20 +377,20 @@ class AIInterviewService:
                 logger.warning("Gemini API returned no response text")
                 return {
                     'success': False,
-                    'question': "I'm having trouble generating \
-                    a question right now. Could you tell me \
-                    about your experience?",
+                    'question': ("I'm having trouble generating "
+                                 "a question right now. Could you tell me "
+                                 "about your experience?"),
                     'search_context': None,
                     'evaluation': None
                 }
 
         except Exception as e:
-            logger.error(f"Error generating interview question: {e}")
+            logger.error("Error generating interview question: %s", e)
             return {
                 'success': False,
-                'question': "I'm experiencing some technical \
-                difficulties. Let's continue - could you tell \
-                me about your background?",
+                'question': ("I'm experiencing some technical "
+                             "difficulties. Let's continue - could you tell "
+                             "me about your background?"),
                 'search_context': None,
                 'evaluation': None
             }
@@ -258,8 +420,8 @@ class AIInterviewService:
 
         # Extract the user's latest response from conversation history
         user_response = "No previous response."
-        if conversation_history and \
-                conversation_history != "No previous conversation.":
+        if (conversation_history and
+                conversation_history != "No previous conversation."):
             lines = conversation_history.strip().split('\n')
             if lines:
                 # Get the last line which should be the user's latest response
