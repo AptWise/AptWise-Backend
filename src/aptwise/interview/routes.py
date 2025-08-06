@@ -240,12 +240,18 @@ async def generate_interview_question(
         conversation_history = ai_service.\
             format_conversation_history(conversation_messages)
 
+        # Enhance user details with tracking information
+        enhanced_user_details = request.user_details.copy()
+        enhanced_user_details['userId'] = current_user
+        enhanced_user_details['sessionId'] = getattr(request, 'session_id', '')
+
         # Generate question
         result = ai_service.generate_interview_question(
-            user_details=request.user_details,
+            user_details=enhanced_user_details,
             skills=request.skills,
             conversation_history=conversation_history,
-            search_context=request.search_context
+            search_context=request.search_context,
+            store_questions=True  # Enable question storage
         )
 
         return InterviewQuestionResponse(
@@ -327,4 +333,74 @@ async def generate_interview_preset(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to generate preset: {str(e)}"
+        )
+
+
+# Question Storage Management Routes
+@router.post("/store-question")
+async def store_question_manually(
+    question: str,
+    answer: str = "",
+    skills: Optional[list] = None,
+    current_user: Optional[str] = Depends(get_current_user)
+):
+    """Manually store a question-answer pair in the vector database."""
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+
+    try:
+        from .ai_service import AIInterviewService
+
+        ai_service = AIInterviewService()
+        result = ai_service.store_question_manually(
+            question=question,
+            answer=answer,
+            skills=skills or [],
+            user_id=current_user
+        )
+
+        return {
+            "success": result['stored'],
+            "message": f"Question {result['action_taken']}",
+            "details": result
+        }
+
+    except Exception as e:
+        logger.error(f"Error storing question manually: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to store question: {str(e)}"
+        )
+
+
+@router.get("/updation-service/stats")
+async def get_updation_service_stats(
+    current_user: Optional[str] = Depends(get_current_user)
+):
+    """Get statistics about the question updation service."""
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+
+    try:
+        from ..utils.updation_service import get_updation_service
+
+        updation_service = get_updation_service()
+        stats = updation_service.get_service_stats()
+
+        return {
+            "success": True,
+            "stats": stats
+        }
+
+    except Exception as e:
+        logger.error(f"Error getting updation service stats: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get service stats: {str(e)}"
         )
