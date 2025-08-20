@@ -7,19 +7,12 @@ from sqlalchemy import create_engine, MetaData, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-# PostgreSQL connection settings
-DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
-DB_PORT = int(os.getenv("DB_PORT", "5432"))
-DB_NAME = os.getenv("DB_NAME", "aptwisedb")
-DB_USER = os.getenv("DB_USER", "aptwise")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "aptwise")
-
-# SQLAlchemy setup
-url = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-DATABASE_URL = url
+# Use DATABASE_URL if provided, otherwise fall back to individual components
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 try:
-    print(f"Attempting to connect to PostgreSQL at {DB_HOST}:{DB_PORT}...")
+    print(f"Using DATABASE_URL: {DATABASE_URL}")
+    print("Attempting to connect to PostgreSQL...")
     engine = create_engine(DATABASE_URL)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     Base = declarative_base()
@@ -35,8 +28,7 @@ try:
         raise detailed_error
 except Exception as e:
     print(f"Error connecting to PostgreSQL: {e}")
-    print(f"Connection details:\
-           Host={DB_HOST}, Port={DB_PORT}, DB={DB_NAME}, User={DB_USER}")
+    print(f"DATABASE_URL: {DATABASE_URL}")
     print("ERROR: Cannot connect to PostgreSQL.\
            Application requires a database connection.")
     engine = None
