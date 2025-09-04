@@ -73,3 +73,6 @@ Once the server is running, you can access the interactive API documentation at:
 
 ## AptWise Architecture
 <img width="3840" height="1913" alt="Untitled diagram _ Mermaid Chart-2025-09-04-105701" src="https://github.com/user-attachments/assets/2b348c73-9d68-47a3-b123-785a25d7c8b0" />
+
+## Data Flow Diagram
+<img width="3840" height="1449" alt="Aptwise Data Flow _ Mermaid Chart-2025-09-04-132840" src="https://github.com/user-attachments/assets/c1e3f952-0d96-45a3-b6f9-fec68b97f548" />
