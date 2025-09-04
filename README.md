@@ -70,3 +70,6 @@ The API will be available at http://localhost:8000.
 Once the server is running, you can access the interactive API documentation at:
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
+
+## AptWise Architecture
+<img width="3840" height="1913" alt="Untitled diagram _ Mermaid Chart-2025-09-04-105701" src="https://github.com/user-attachments/assets/2b348c73-9d68-47a3-b123-785a25d7c8b0" />
